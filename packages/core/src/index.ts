@@ -21,3 +21,5 @@ export type { ResilienceModuleOptions, ResilienceModuleAsyncOptions } from './ne
 export { ResilienceService } from './nest/resilience.service';
 export { RESILIENCE_STORE, RESILIENCE_OPTIONS } from './nest/tokens';
 export { CircuitBreaker, Retry, Timeout } from './nest/decorators';
+export { INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord } from './breaker/state-machine';
+export type { CircuitState } from './breaker/state-machine';
