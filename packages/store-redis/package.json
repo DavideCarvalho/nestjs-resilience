@@ -1,0 +1,36 @@
+{
+  "name": "@dudousxd/nestjs-resilience-store-redis",
+  "version": "0.1.0",
+  "description": "Redis-backed distributed ResilienceStore for @dudousxd/nestjs-resilience",
+  "license": "MIT",
+  "author": "Davide Carvalho",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.cts", "default": "./dist/index.cjs" }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:db": "vitest run --config vitest.config.ts redis.store.db"
+  },
+  "peerDependencies": {
+    "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
+    "ioredis": "^5.0.0"
+  },
+  "devDependencies": {
+    "@dudousxd/nestjs-resilience": "workspace:^",
+    "@testcontainers/redis": "^10.18.0",
+    "ioredis": "^5.4.2",
+    "tsup": "^8",
+    "typescript": "^5.9.3",
+    "vitest": "^3"
+  }
+}
