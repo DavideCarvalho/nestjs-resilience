@@ -21,3 +21,4 @@ export { ResilienceModule } from './nest/resilience.module';
 export type { ResilienceModuleOptions, ResilienceModuleAsyncOptions } from './nest/resilience.module';
 export { ResilienceService } from './nest/resilience.service';
 export { RESILIENCE_STORE, RESILIENCE_OPTIONS } from './nest/tokens';
+export { CircuitBreaker, Retry, Timeout } from './nest/decorators';

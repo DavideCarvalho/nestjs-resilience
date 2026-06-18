@@ -1,7 +1,9 @@
 import { type DynamicModule, Module, type Provider } from '@nestjs/common';
+import { DiscoveryModule } from '@nestjs/core';
 import { InMemoryResilienceStore } from '../breaker/in-memory.store';
 import type { ResilienceStore } from '../breaker/store';
 import type { Policy } from '../policy';
+import { ResilienceExplorer } from './explorer';
 import { ResilienceService } from './resilience.service';
 import { RESILIENCE_OPTIONS, RESILIENCE_STORE } from './tokens';
 
@@ -30,7 +32,8 @@ export class ResilienceModule {
     return {
       module: ResilienceModule,
       global: options.global ?? true,
-      providers,
+      imports: [DiscoveryModule],
+      providers: [...providers, ResilienceExplorer],
       exports: [ResilienceService, RESILIENCE_STORE],
     };
   }
@@ -48,7 +51,8 @@ export class ResilienceModule {
     return {
       module: ResilienceModule,
       global: options.global ?? true,
-      providers,
+      imports: [DiscoveryModule],
+      providers: [...providers, ResilienceExplorer],
       exports: [ResilienceService, RESILIENCE_STORE],
     };
   }
