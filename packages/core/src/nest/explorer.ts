@@ -1,7 +1,6 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
 import type { ResilienceStore } from '../breaker/store';
-import type { EventSink } from '../events';
 import { circuitBreaker } from '../policies/circuit-breaker';
 import { retry } from '../policies/retry';
 import { timeout } from '../policies/timeout';
@@ -13,6 +12,8 @@ import { RESILIENCE_STORE } from './tokens';
 
 @Injectable()
 export class ResilienceExplorer implements OnModuleInit {
+  private readonly wrapped = new WeakSet<object>();
+
   constructor(
     @Inject(DiscoveryService) private readonly discovery: DiscoveryService,
     @Inject(MetadataScanner) private readonly scanner: MetadataScanner,
@@ -24,6 +25,8 @@ export class ResilienceExplorer implements OnModuleInit {
     for (const wrapper of this.discovery.getProviders()) {
       const instance = wrapper.instance as Record<string, unknown> | undefined;
       if (!instance || typeof instance !== 'object') continue;
+      if (this.wrapped.has(instance)) continue;
+      this.wrapped.add(instance);
       const proto = Object.getPrototypeOf(instance);
       for (const methodName of this.scanner.getAllMethodNames(proto)) {
         const metas: PolicyMeta[] | undefined = Reflect.getMetadata(RESILIENCE_META, proto, methodName);

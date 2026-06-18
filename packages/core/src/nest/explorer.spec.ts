@@ -19,6 +19,12 @@ class FlakyService {
   async always(): Promise<string> {
     throw new Error('down');
   }
+
+  @Timeout(50)
+  async slow(): Promise<string> {
+    await new Promise((r) => setTimeout(r, 1000));
+    return 'too-late';
+  }
 }
 
 describe('ResilienceExplorer', () => {
@@ -44,5 +50,15 @@ describe('ResilienceExplorer', () => {
     await svc.always().catch(() => {});
     // now open → short-circuits
     await expect(svc.always()).rejects.toThrow(/Circuit/);
+  });
+
+  it('@Timeout rejects a method that exceeds the budget', async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [ResilienceModule.forRoot()],
+      providers: [FlakyService],
+    }).compile();
+    await moduleRef.init();
+    const svc = moduleRef.get(FlakyService);
+    await expect(svc.slow()).rejects.toBeInstanceOf(TimeoutError);
   });
 });
