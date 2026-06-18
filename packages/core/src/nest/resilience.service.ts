@@ -5,7 +5,6 @@ import { diagnosticsSink } from '../integration/diagnostics';
 import { type EventSink, noopSink } from '../events';
 import { type FailoverOptions, failover } from '../policies/failover';
 import type { Operation, Policy } from '../policy';
-import { wrap } from '../policies/wrap';
 import { RESILIENCE_OPTIONS, RESILIENCE_STORE } from './tokens';
 import type { ResilienceModuleOptions } from './resilience.module';
 
