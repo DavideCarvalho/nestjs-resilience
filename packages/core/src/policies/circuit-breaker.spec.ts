@@ -31,6 +31,7 @@ describe('circuitBreaker', () => {
     const types = onEvent.mock.calls.map((c) => c[0].type);
     expect(types).toContain('circuit-opened');
     expect(types).toContain('short-circuited');
+    expect(types).toContain('circuit-half-open');
     expect(types).toContain('circuit-closed');
   });
 });
