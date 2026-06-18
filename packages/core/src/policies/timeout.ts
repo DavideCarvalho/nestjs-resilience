@@ -1,0 +1,27 @@
+import { type Clock, systemClock } from '../clock';
+import { TimeoutError } from '../errors';
+import { type Operation, type Policy, type PolicyContext, rootContext } from '../policy';
+
+export function timeout(ms: number, opts: { clock?: Clock } = {}): Policy {
+  const clock = opts.clock ?? systemClock;
+  return {
+    execute<T>(op: Operation<T>, parent: PolicyContext = rootContext()): Promise<T> {
+      const ac = new AbortController();
+      const onParentAbort = () => ac.abort(parent.signal.reason);
+      if (parent.signal.aborted) ac.abort(parent.signal.reason);
+      else parent.signal.addEventListener('abort', onParentAbort, { once: true });
+
+      const cancelTimer = clock.setTimer(ms, () => ac.abort(new TimeoutError(ms)));
+      const ctx: PolicyContext = { signal: ac.signal, attempt: parent.attempt };
+
+      const aborted = new Promise<never>((_, reject) => {
+        ac.signal.addEventListener('abort', () => reject(ac.signal.reason ?? new TimeoutError(ms)), { once: true });
+      });
+
+      return Promise.race([op(ctx), aborted]).finally(() => {
+        cancelTimer();
+        parent.signal.removeEventListener('abort', onParentAbort);
+      });
+    },
+  };
+}
