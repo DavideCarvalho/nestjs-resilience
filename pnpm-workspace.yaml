@@ -2,7 +2,5 @@ packages:
   - 'packages/*'
 allowBuilds:
   '@biomejs/biome': true
-  cpu-features: set this to true or false
+  better-sqlite3: true
   esbuild: true
-  protobufjs: set this to true or false
-  ssh2: set this to true or false
