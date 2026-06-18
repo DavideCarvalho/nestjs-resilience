@@ -198,10 +198,10 @@ interface ResilienceStore {
 **Adapter authors** can verify a custom store against the canonical contract:
 
 ```ts
-import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience';
+import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience/testing';
 
 // Inside a vitest / jest describe block:
-runResilienceStoreContract(() => new MyRedisResilienceStore(client));
+runResilienceStoreContract('MyRedisResilienceStore', (clock) => new MyRedisResilienceStore(client, { clock }));
 ```
 
 ---

@@ -14,7 +14,6 @@ export { type FailoverOptions, failover } from './policies/failover';
 export type { ResilienceStore } from './breaker/store';
 export type { Admission, BreakerConfig, CircuitSnapshot, CircuitStatus } from './breaker/types';
 export { InMemoryResilienceStore } from './breaker/in-memory.store';
-export { runResilienceStoreContract } from './breaker/store-contract';
 export { diagnosticsSink } from './integration/diagnostics';
 export { tenantSuffix } from './integration/context';
 export { ResilienceModule } from './nest/resilience.module';
