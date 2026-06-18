@@ -15,6 +15,10 @@ export function timeout(ms: number, opts: { clock?: Clock } = {}): Policy {
       const ctx: PolicyContext = { signal: ac.signal, attempt: parent.attempt };
 
       const aborted = new Promise<never>((_, reject) => {
+        if (ac.signal.aborted) {
+          reject(ac.signal.reason ?? new TimeoutError(ms));
+          return;
+        }
         ac.signal.addEventListener('abort', () => reject(ac.signal.reason ?? new TimeoutError(ms)), { once: true });
       });
 

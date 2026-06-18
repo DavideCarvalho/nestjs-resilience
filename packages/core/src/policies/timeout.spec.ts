@@ -48,4 +48,13 @@ describe('timeout', () => {
     parentAc.abort(new Error('parent gone'));
     await expect(result).rejects.toThrow('parent gone');
   });
+
+  it('rejects immediately when the parent signal is already aborted before execute', async () => {
+    const clock = new FakeClock();
+    const ac = new AbortController();
+    ac.abort(new Error('already gone'));
+    const p = timeout(1000, { clock });
+    const op = () => new Promise<never>(() => {});
+    await expect(p.execute(op, { signal: ac.signal, attempt: 0 })).rejects.toThrow('already gone');
+  });
 });
