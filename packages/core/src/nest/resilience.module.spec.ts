@@ -57,4 +57,15 @@ describe('ResilienceModule', () => {
     const svc = moduleRef.get(ResilienceService);
     await expect(svc.execute('slow', async () => 'async-ok')).resolves.toBe('async-ok');
   });
+
+  it('mirrors events to a provided EventEmitter2-style emitter', async () => {
+    const events: Array<{ name: string; payload: unknown }> = [];
+    const emitter = { emit: (name: string, payload: unknown) => { events.push({ name, payload }); return true; } };
+    const moduleRef = await Test.createTestingModule({
+      imports: [ResilienceModule.forRoot({ emit: false, eventEmitter: emitter })],
+    }).compile();
+    const svc = moduleRef.get(ResilienceService);
+    svc.sink({ type: 'circuit-opened', key: 'k', failures: 3 });
+    expect(events).toEqual([{ name: 'resilience.circuit.opened', payload: { type: 'circuit-opened', key: 'k', failures: 3 } }]);
+  });
 });

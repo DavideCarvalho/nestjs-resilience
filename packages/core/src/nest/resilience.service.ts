@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ResilienceStore } from '../breaker/store';
 import type { CircuitSnapshot } from '../breaker/types';
 import { diagnosticsSink } from '../integration/diagnostics';
-import { type EventSink, noopSink } from '../events';
+import { eventEmitterSink } from '../integration/event-emitter';
+import { type EventSink, combineSinks, noopSink } from '../events';
 import { type FailoverOptions, failover } from '../policies/failover';
 import type { Operation, Policy } from '../policy';
 import { RESILIENCE_OPTIONS, RESILIENCE_STORE } from './tokens';
@@ -17,7 +18,8 @@ export class ResilienceService {
     @Inject(RESILIENCE_STORE) private readonly store: ResilienceStore,
     @Inject(RESILIENCE_OPTIONS) options: ResilienceModuleOptions,
   ) {
-    this.sink = options.emit === false ? noopSink : diagnosticsSink();
+    const base = options.emit === false ? noopSink : diagnosticsSink();
+    this.sink = options.eventEmitter ? combineSinks(base, eventEmitterSink(options.eventEmitter)) : base;
     this.policies = options.policies ?? {};
   }
 

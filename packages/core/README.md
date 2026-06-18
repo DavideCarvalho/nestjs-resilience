@@ -181,6 +181,46 @@ circuitBreaker({ key: 'x', store, threshold: 5, cooldownMs: 30_000, onEvent: svc
 
 ---
 
+### Event-emitter mirror
+
+Resilience events can be mirrored to `@nestjs/event-emitter` by passing your `EventEmitter2` instance as `eventEmitter`. The idiomatic approach is to inject it via `forRootAsync`:
+
+```ts
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
+
+ResilienceModule.forRootAsync({
+  inject: [EventEmitter2],
+  useFactory: (ee: EventEmitter2) => ({ eventEmitter: ee }),
+});
+```
+
+Then listen with `@OnEvent`:
+
+```ts
+import { OnEvent } from '@nestjs/event-emitter';
+import type { ResilienceEvent } from '@dudousxd/nestjs-resilience';
+
+@OnEvent('resilience.circuit.opened')
+handleCircuitOpened(payload: ResilienceEvent) {
+  console.log('Circuit opened:', payload);
+}
+```
+
+Events are named `resilience.<type-dotted>` — the event type with `-` replaced by `.` and prefixed with `resilience.` (e.g. `circuit-opened` → `resilience.circuit.opened`). The payload is the full `ResilienceEvent` object.
+
+The `eventEmitter` option accepts any object with an `emit(name, ...values)` method (`EventEmitterLike`). Core does **not** import `@nestjs/event-emitter` — the emitter is structurally typed.
+
+For manual composition, `eventEmitterSink` and `combineSinks` are exported from the package:
+
+```ts
+import { eventEmitterSink, combineSinks, diagnosticsSink } from '@dudousxd/nestjs-resilience';
+
+const sink = combineSinks(diagnosticsSink(), eventEmitterSink(myEmitter));
+```
+
+---
+
 ## The `ResilienceStore` seam
 
 Circuit-breaker state lives behind a pluggable interface:

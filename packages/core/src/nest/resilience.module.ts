@@ -2,6 +2,7 @@ import { type DynamicModule, Module, type Provider } from '@nestjs/common';
 import { DiscoveryModule } from '@nestjs/core';
 import { InMemoryResilienceStore } from '../breaker/in-memory.store';
 import type { ResilienceStore } from '../breaker/store';
+import type { EventEmitterLike } from '../integration/event-emitter';
 import type { Policy } from '../policy';
 import { ResilienceExplorer } from './explorer';
 import { ResilienceService } from './resilience.service';
@@ -13,6 +14,8 @@ export interface ResilienceModuleOptions {
   global?: boolean;
   /** Emit diagnostics events. Default true. */
   emit?: boolean;
+  /** Mirror resilience events to an EventEmitter2-style emitter (e.g. @nestjs/event-emitter). */
+  eventEmitter?: EventEmitterLike;
 }
 
 export interface ResilienceModuleAsyncOptions {
