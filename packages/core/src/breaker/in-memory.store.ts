@@ -65,6 +65,6 @@ export class InMemoryResilienceStore implements ResilienceStore {
 
   async snapshot(key: string): Promise<CircuitSnapshot> {
     const e = this.entry(key);
-    return { status: e.status, failures: e.failures, openUntil: e.openUntil || undefined };
+    return { status: e.status, failures: e.failures, ...(e.openUntil ? { openUntil: e.openUntil } : {}) };
   }
 }
