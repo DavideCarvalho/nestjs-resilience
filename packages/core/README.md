@@ -1,6 +1,6 @@
 # @dudousxd/nestjs-resilience
 
-NestJS-native composable resilience policies — timeout, retry, circuit-breaker, and failover — with zero runtime dependencies. Peers are `@nestjs/common` and `@nestjs/core`; optional integrations add structured diagnostics (`@dudousxd/nestjs-diagnostics`) and event-emitter support (`@nestjs/event-emitter`).
+NestJS-native composable resilience policies — timeout, retry, circuit-breaker, and failover — with zero runtime dependencies. Peers are `@nestjs/common` and `@nestjs/core`; the optional `@dudousxd/nestjs-diagnostics` integration adds structured diagnostics via the `aviary` channel.
 
 ## Install
 
@@ -51,8 +51,19 @@ const result = await failover({
   },
   // optional per-target policy
   policy: (url) => wrap(timeout(3_000), retry({ attempts: 2 })),
+  // optional callback fired each time a target fails before trying the next one
+  onFailover: (target, error, index) => {
+    console.warn(`Target ${index} (${target}) failed:`, error);
+  },
 });
 ```
+
+`failover()` options:
+- `targets` — ordered list of values passed to `run` one at a time.
+- `run` — async function that receives the current target and a `PolicyContext`.
+- `policy` _(optional)_ — per-target policy factory; wraps `run` with e.g. timeout/retry before the next target is tried.
+- `onFailover` _(optional)_ — `(target, error, index) => void` callback invoked after each failed target (before advancing to the next). Distinct from `onEvent`, which is the structured `EventSink` for diagnostics.
+- `onEvent` _(optional)_ — `EventSink` to receive structured `failover` events on the `aviary` channel.
 
 ---
 
@@ -82,7 +93,7 @@ import { Timeout, Retry, CircuitBreaker, exponential } from '@dudousxd/nestjs-re
 export class PaymentsService {
   @Timeout(5_000)
   @Retry({ attempts: 3, backoff: exponential(200) })
-  @CircuitBreaker({ threshold: 5, cooldownMs: 30_000 })
+  @CircuitBreaker({ threshold: 5, cooldownMs: 30_000, halfOpenMax: 1 })
   async charge(amount: number): Promise<Receipt> {
     // ...
   }
@@ -90,6 +101,14 @@ export class PaymentsService {
 ```
 
 Decorators are composed outermost-first (top of stack = outer policy). `@CircuitBreaker` on a method uses the class name + method name as the default circuit key; supply `key` to override.
+
+`@CircuitBreaker` options:
+- `threshold` — number of consecutive failures before the circuit opens.
+- `cooldownMs` — duration the circuit stays open before allowing a half-open probe.
+- `key` _(optional)_ — explicit circuit key; defaults to `ClassName.methodName`.
+- `halfOpenMax` _(optional)_ — maximum number of concurrent half-open probes allowed through during cooldown (defaults to `1`).
+
+**Timeout note:** a `@Timeout` (or `timeout()`) rejects the caller with `TimeoutError` and sets `ctx.signal` to aborted. However, the underlying operation is not force-killed — it continues running until it resolves or rejects on its own. Operations should honour `ctx.signal` to stop work promptly when the timeout fires.
 
 `forRootAsync` is also available for factory-based setup:
 

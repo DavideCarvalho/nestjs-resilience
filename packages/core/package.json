@@ -24,14 +24,10 @@
   "peerDependencies": {
     "@dudousxd/nestjs-diagnostics": ">=0.2.0 <1",
     "@nestjs/common": "^10 || ^11",
-    "@nestjs/core": "^10 || ^11",
-    "@nestjs/event-emitter": "^2 || ^3"
+    "@nestjs/core": "^10 || ^11"
   },
   "peerDependenciesMeta": {
     "@dudousxd/nestjs-diagnostics": {
-      "optional": true
-    },
-    "@nestjs/event-emitter": {
       "optional": true
     }
   },

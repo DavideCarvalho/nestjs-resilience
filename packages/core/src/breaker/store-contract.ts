@@ -24,6 +24,10 @@ export function runResilienceStoreContract(name: string, makeStore: (clock: Cloc
     });
 
     it('counts concurrent failures exactly (no lost updates)', async () => {
+      // NOTE: This test proves serialized correctness under Node's run-to-completion model.
+      // It does NOT prove interleaved atomicity for async adapters (Redis, DB, etc.).
+      // Adapter authors MUST guarantee atomicity at the storage layer (e.g. via Lua scripts,
+      // WATCH/MULTI/EXEC, or CAS) so that concurrent `record` calls never produce lost updates.
       const s = makeStore(new FakeClock());
       // 2 concurrent failures keep it closed (threshold 3), the 3rd opens it
       await Promise.all([s.record('k', cfg, false, false), s.record('k', cfg, false, false)]);
