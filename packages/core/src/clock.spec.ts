@@ -34,4 +34,13 @@ describe('FakeClock', () => {
     ac.abort();
     await expect(p).rejects.toThrow();
   });
+
+  it('delay() rejects immediately when signal is already aborted', async () => {
+    const clock = new FakeClock();
+    const ac = new AbortController();
+    ac.abort(new Error('gone'));
+    await expect(clock.delay(50, ac.signal)).rejects.toThrow('gone');
+    // No timers should have been scheduled
+    expect(clock.now()).toBe(0);
+  });
 });

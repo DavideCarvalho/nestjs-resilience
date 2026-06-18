@@ -14,6 +14,10 @@ export class SystemClock implements Clock {
   }
   delay(ms: number, signal?: AbortSignal): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      if (signal?.aborted) {
+        reject(signal.reason ?? new Error('aborted'));
+        return;
+      }
       const cancel = this.setTimer(ms, resolve);
       signal?.addEventListener(
         'abort',
@@ -48,6 +52,10 @@ export class FakeClock implements Clock {
   }
   delay(ms: number, signal?: AbortSignal): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      if (signal?.aborted) {
+        reject(signal.reason ?? new Error('aborted'));
+        return;
+      }
       const cancel = this.setTimer(ms, resolve);
       signal?.addEventListener(
         'abort',
