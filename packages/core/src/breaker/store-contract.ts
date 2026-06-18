@@ -40,5 +40,15 @@ export function runResilienceStoreContract(name: string, makeStore: (clock: Cloc
       await s.admit('k', cfg);
       expect(await s.record('k', cfg, true, true)).toBe('closed');
     });
+
+    it('probe failure re-opens the circuit', async () => {
+      const clock = new FakeClock();
+      const s = makeStore(clock);
+      for (let i = 0; i < 3; i++) await s.record('k', cfg, false, false);
+      clock.advance(1000);
+      await s.admit('k', cfg);
+      expect(await s.record('k', cfg, false, true)).toBe('open');
+      expect((await s.snapshot('k')).status).toBe('open');
+    });
   });
 }
