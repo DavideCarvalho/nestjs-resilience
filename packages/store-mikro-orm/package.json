@@ -29,7 +29,8 @@
   },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
-    "@mikro-orm/core": "^6.0.0 || ^7.0.0"
+    "@mikro-orm/core": "^6.0.0 || ^7.0.0",
+    "@mikro-orm/postgresql": "^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",

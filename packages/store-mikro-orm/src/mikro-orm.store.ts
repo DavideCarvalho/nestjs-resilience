@@ -20,9 +20,14 @@ export class MikroOrmResilienceStore implements ResilienceStore {
     return em.transactional(async (tx): Promise<Admission> => {
       const conn = tx.getConnection('write');
       const ctx = tx.getTransactionContext();
+      if (!ctx) {
+        throw new Error(
+          'MikroOrmResilienceStore requires DB transactions for atomic circuit updates; do not set disableTransactions on the MikroORM instance.',
+        );
+      }
       await conn.execute(INSERT_INITIAL, [key], 'run', ctx);
       const rows = (await conn.execute(SELECT_FOR_UPDATE, [key], 'all', ctx)) as unknown[];
-      const { state, admission } = computeAdmit(rowToState(rows[0] as never), cfg, this.clock.now());
+      const { state, admission } = computeAdmit(rowToState(rows[0] as Record<string, unknown> | undefined), cfg, this.clock.now());
       await conn.execute(UPDATE_STATE, [state.status, state.failures, state.openUntil, state.probes, key], 'run', ctx);
       return admission;
     });
@@ -33,9 +38,14 @@ export class MikroOrmResilienceStore implements ResilienceStore {
     return em.transactional(async (tx): Promise<CircuitStatus> => {
       const conn = tx.getConnection('write');
       const ctx = tx.getTransactionContext();
+      if (!ctx) {
+        throw new Error(
+          'MikroOrmResilienceStore requires DB transactions for atomic circuit updates; do not set disableTransactions on the MikroORM instance.',
+        );
+      }
       await conn.execute(INSERT_INITIAL, [key], 'run', ctx);
       const rows = (await conn.execute(SELECT_FOR_UPDATE, [key], 'all', ctx)) as unknown[];
-      const { state, status } = computeRecord(rowToState(rows[0] as never), cfg, ok, probe, this.clock.now());
+      const { state, status } = computeRecord(rowToState(rows[0] as Record<string, unknown> | undefined), cfg, ok, probe, this.clock.now());
       await conn.execute(UPDATE_STATE, [state.status, state.failures, state.openUntil, state.probes, key], 'run', ctx);
       return status;
     });
@@ -43,7 +53,7 @@ export class MikroOrmResilienceStore implements ResilienceStore {
 
   async snapshot(key: string): Promise<CircuitSnapshot> {
     const rows = (await this.orm.em.getConnection().execute(SELECT_PLAIN, [key], 'all')) as unknown[];
-    const s = rowToState(rows[0] as never);
+    const s = rowToState(rows[0] as Record<string, unknown> | undefined);
     return { status: s.status, failures: s.failures, ...(s.openUntil ? { openUntil: s.openUntil } : {}) };
   }
 }

@@ -1,5 +1,7 @@
 # @dudousxd/nestjs-resilience-store-mikro-orm
 
+> **Postgres only.** This adapter relies on Postgres-specific SQL (`SELECT … FOR UPDATE`, `BIGINT`, `INSERT … ON CONFLICT DO NOTHING`). You must pass a `MikroORM` instance backed by `@mikro-orm/postgresql`. Using any other driver (SQLite, MySQL, MariaDB, …) will result in a runtime error.
+
 A MikroORM (Postgres) `ResilienceStore` for `@dudousxd/nestjs-resilience`. Circuit-breaker state — status, failure count, open-until timestamp, and in-flight half-open probes — is stored in a Postgres table via MikroORM. The store reuses the core's pure state machine (`computeAdmit`, `computeRecord`) so behavior is identical to the in-memory implementation. Mutations (`admit` and `record`) run in MikroORM transactions with pessimistic `SELECT … FOR UPDATE` locking, serializing concurrent callers and guaranteeing exactly-one half-open probe with no lost updates.
 
 ## Install
