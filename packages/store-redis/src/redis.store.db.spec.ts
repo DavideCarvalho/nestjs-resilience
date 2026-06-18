@@ -1,4 +1,4 @@
-import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience';
+import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience/testing';
 import { RedisContainer, type StartedRedisContainer } from '@testcontainers/redis';
 import Redis from 'ioredis';
 import { afterAll, beforeAll, describe } from 'vitest';
