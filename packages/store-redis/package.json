@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/*.db.spec.ts'",
     "test:db": "vitest run --config vitest.config.ts redis.store.db"
   },
   "peerDependencies": {
