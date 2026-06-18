@@ -17,3 +17,7 @@ export { InMemoryResilienceStore } from './breaker/in-memory.store';
 export { runResilienceStoreContract } from './breaker/store-contract';
 export { diagnosticsSink } from './integration/diagnostics';
 export { tenantSuffix } from './integration/context';
+export { ResilienceModule } from './nest/resilience.module';
+export type { ResilienceModuleOptions, ResilienceModuleAsyncOptions } from './nest/resilience.module';
+export { ResilienceService } from './nest/resilience.service';
+export { RESILIENCE_STORE, RESILIENCE_OPTIONS } from './nest/tokens';
