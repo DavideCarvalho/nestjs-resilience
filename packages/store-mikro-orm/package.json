@@ -1,6 +1,6 @@
 {
   "name": "@dudousxd/nestjs-resilience-store-mikro-orm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MikroORM (Postgres) ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",
@@ -8,7 +8,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -27,7 +29,9 @@
     "test": "vitest run --exclude '**/*.db.spec.ts' --passWithNoTests",
     "test:db": "vitest run"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
     "@mikro-orm/core": "^6.0.0 || ^7.0.0",
