@@ -27,6 +27,7 @@
     "test": "vitest run --exclude '**/*.db.spec.ts'",
     "test:db": "vitest run"
   },
+  "publishConfig": { "access": "public" },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
     "@mikro-orm/core": "^6.0.0 || ^7.0.0",
