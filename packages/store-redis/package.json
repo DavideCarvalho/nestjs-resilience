@@ -21,6 +21,7 @@
     "test": "vitest run --exclude '**/*.db.spec.ts'",
     "test:db": "vitest run --config vitest.config.ts redis.store.db"
   },
+  "publishConfig": { "access": "public" },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
     "ioredis": "^5.0.0"

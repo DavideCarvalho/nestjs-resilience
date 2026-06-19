@@ -25,6 +25,7 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "publishConfig": { "access": "public" },
   "peerDependencies": {
     "@dudousxd/nestjs-diagnostics": ">=0.2.0 <1",
     "@nestjs/common": "^10 || ^11",
