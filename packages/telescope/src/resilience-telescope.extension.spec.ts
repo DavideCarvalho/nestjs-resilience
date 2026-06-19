@@ -96,6 +96,22 @@ describe('nestjsResilienceTelescope extension', () => {
     expect(result.value).toBe(1); // only A
   });
 
+  it('openCircuits uses max-ts regardless of result ordering', async () => {
+    const { ctx, storage } = await makeCtx();
+    // store the NEWER (closed) transition first, the OLDER (opened) second
+    await storage.store([
+      resilienceEntry(content({ event: 'circuit-closed', key: 'C', ts: 10 })),
+      resilienceEntry(content({ event: 'circuit-opened', key: 'C', ts: 1 })),
+    ]);
+
+    const provider = nestjsResilienceTelescope()
+      .dataProviders?.(ctx)
+      .find((p) => p.name === 'resilience.openCircuits');
+    const result = (await provider?.resolve({}, ctx)) as { value: number };
+
+    expect(result.value).toBe(0); // latest transition by ts is 'circuit-closed'
+  });
+
   it('failovers counts failover entries', async () => {
     const { ctx, storage } = await makeCtx();
     await storage.store([
