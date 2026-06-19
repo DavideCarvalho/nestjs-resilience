@@ -50,6 +50,19 @@ ResilienceModule.forRoot({ emit: true }); // default — installs diagnosticsSin
 
 The module wires this automatically; you only call `diagnosticsSink()` by hand when composing `onEvent` on a standalone policy.
 
+### Telescope dashboard
+
+For a first-class view in [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) — instead of generic diagnostic blobs — add [`@dudousxd/nestjs-resilience-telescope`](https://github.com/DavideCarvalho/nestjs-resilience/tree/master/packages/telescope). It records every transition as a `resilience` entry and contributes a **Resilience** dashboard (open circuits, recent failovers, most-tripped circuits, and a table of recent transitions):
+
+```ts
+import { TelescopeModule } from '@dudousxd/nestjs-telescope';
+import { nestjsResilienceTelescope } from '@dudousxd/nestjs-resilience-telescope';
+
+TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] });
+```
+
+It subscribes to the `aviary:resilience:*` channels, so it needs nothing beyond the default `emit: true` — and costs nothing until resilience emits.
+
 ## Event-emitter mirror
 
 To react to transitions **inside your app** — invalidate a cache when a circuit opens, page on repeated failovers — mirror events onto `@nestjs/event-emitter`:
