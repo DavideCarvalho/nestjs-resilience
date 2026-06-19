@@ -1,0 +1,40 @@
+{
+  "name": "@dudousxd/nestjs-resilience-telescope",
+  "version": "0.1.0",
+  "description": "nestjs-telescope extension for @dudousxd/nestjs-resilience — records circuit-breaker / failover / timeout / retry events in the Telescope dashboard.",
+  "license": "MIT",
+  "author": "Davide Carvalho",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "publishConfig": { "access": "public" },
+  "dependencies": {
+    "@dudousxd/nestjs-diagnostics": "^0.2.3"
+  },
+  "peerDependencies": {
+    "@dudousxd/nestjs-telescope": "^1.9.0"
+  },
+  "devDependencies": {
+    "@dudousxd/nestjs-telescope": "^1.11.0",
+    "@dudousxd/nestjs-telescope-testing": "^1.11.0",
+    "@types/node": "^22",
+    "tsup": "^8",
+    "typescript": "^5.9.3",
+    "vitest": "^3"
+  },
+  "keywords": ["nestjs", "resilience", "circuit-breaker", "telescope", "observability", "watcher", "extension"]
+}
