@@ -38,7 +38,7 @@
   <g transform="translate(980, 60)">
     <rect x="0" y="0" width="220" height="232" rx="14" fill="#0C0A0E" fill-opacity="0.4" stroke="#E0234E" stroke-opacity="0.35"/>
     <text x="20" y="34" font-family="ui-monospace, monospace" font-size="13" letter-spacing="2" fill="#8A847C">PLATE</text>
-    <text x="200" y="34" text-anchor="end" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1" fill="#B9B2AA">No. 11</text>
+    <text x="200" y="34" text-anchor="end" font-family="ui-monospace, monospace" font-size="13" letter-spacing="1" fill="#B9B2AA">No. 10</text>
     <g transform="translate(110, 118)">
       <!-- swept-back cockatiel crest -->
       <path d="M-15 -26 C-12 -36 -6 -41 2 -43" stroke="#E0234E" stroke-width="2" stroke-linecap="round" fill="none"/>
