@@ -1,0 +1,130 @@
+---
+title: Decorators & Module
+description: Wrap provider methods with @Timeout / @Retry / @CircuitBreaker, register named policies through ResilienceModule, and run them via ResilienceService.
+icon: Boxes
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The NestJS surface is three things: **decorators** that wrap a provider method declaratively, the **`ResilienceModule`** that wires them up and holds named policies + the store, and the **`ResilienceService`** for running policies imperatively and inspecting circuits.
+
+## The module
+
+`ResilienceModule.forRoot()` returns a **global** dynamic module — register it once.
+
+```ts title="app.module.ts"
+import { ResilienceModule, wrap, timeout, retry, exponential } from '@dudousxd/nestjs-resilience';
+
+@Module({
+  imports: [
+    ResilienceModule.forRoot({
+      policies: {
+        payments: () => wrap(timeout(2_000), retry({ attempts: 3, backoff: exponential(100) })),
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+```ts
+interface ResilienceModuleOptions {
+  store?: ResilienceStore;                 // default: a new InMemoryResilienceStore
+  policies?: Record<string, () => Policy>; // named policies for ResilienceService / @-decorators
+  global?: boolean;                        // default: true
+  emit?: boolean;                          // default: true — emit diagnostics events
+  eventEmitter?: EventEmitterLike;         // mirror events to @nestjs/event-emitter
+}
+```
+
+For a store that needs DI (a Redis client, a DataSource), use **`forRootAsync`**:
+
+```ts
+ResilienceModule.forRootAsync({
+  inject: [RedisClient],
+  useFactory: (redis: Redis) => ({
+    store: new RedisResilienceStore(redis),
+  }),
+});
+```
+
+<Callout type="info">
+`emit: true` routes every state transition to [`@dudousxd/nestjs-diagnostics`](https://github.com/DavideCarvalho/nestjs-diagnostics) (a no-op if it isn't installed). Pass `eventEmitter` to also mirror them onto `@nestjs/event-emitter`. See [Integrations](/docs/integrations).
+</Callout>
+
+## Decorators
+
+Annotate a provider method and the module's explorer wraps it at startup — no change to the call sites.
+
+```ts
+import { Injectable } from '@nestjs/common';
+import { CircuitBreaker, Retry, Timeout, exponential } from '@dudousxd/nestjs-resilience';
+
+@Injectable()
+export class InventoryService {
+  @CircuitBreaker({ key: 'inventory-api', threshold: 5, cooldownMs: 30_000 })
+  @Retry({ attempts: 3, backoff: exponential(100) })
+  @Timeout(5_000)
+  async check(sku: string): Promise<Stock> {
+    return this.http.get(`/stock/${sku}`);
+  }
+}
+```
+
+| Decorator | Argument |
+| --- | --- |
+| `@Timeout(ms)` | the deadline in milliseconds |
+| `@Retry({ attempts, backoff? })` | attempt count and optional `Backoff` |
+| `@CircuitBreaker({ threshold, cooldownMs, key?, halfOpenMax? })` | breaker config; `key` defaults to the method |
+
+Stacked decorators compose just like [`wrap`](/docs/policies#wrap--compose-policies): top is outermost. The `@CircuitBreaker` uses the **store from the module**, so a distributed store there makes the decorator fleet-aware for free.
+
+<Callout type="warn">
+The decorators only take effect when `ResilienceModule.forRoot()` is registered — the explorer needs the module to discover and rewrap them.
+</Callout>
+
+## The service
+
+Inject `ResilienceService` to run policies imperatively and to inspect or reset circuits.
+
+```ts
+import { ResilienceService } from '@dudousxd/nestjs-resilience';
+
+@Injectable()
+export class BillingService {
+  constructor(private readonly resilience: ResilienceService) {}
+
+  // run a named policy from the module…
+  charge(order: Order) {
+    return this.resilience.execute('payments', () => chargeCard(order));
+  }
+
+  // …or an inline one
+  ping() {
+    return this.resilience.execute(timeout(1_000), () => this.http.get('/health'));
+  }
+
+  // walk an ordered list of targets
+  notify(message: Message) {
+    return this.resilience.failover({
+      targets: this.providers,
+      run: (p) => p.send(message),
+    });
+  }
+
+  // inspect / reset a circuit by key
+  async circuitState() {
+    return this.resilience.circuit('inventory-api').snapshot();
+  }
+  reopen() {
+    return this.resilience.circuit('inventory-api').reset();
+  }
+}
+```
+
+| Method | Purpose |
+| --- | --- |
+| `execute(name \| policy, op)` | run a named or inline policy |
+| `failover(opts)` | the [`failover`](/docs/policies#failover) primitive |
+| `circuit(key).snapshot()` | read the current `CircuitSnapshot` (`status`, `failures`, `openUntil?`) |
+| `circuit(key).reset()` | force a circuit back to closed |

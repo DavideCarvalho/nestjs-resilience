@@ -1,0 +1,148 @@
+---
+title: Stores
+description: Share circuit-breaker state across instances with a pluggable ResilienceStore — in-memory by default, or Redis / Postgres / SQLite adapters that coordinate the half-open probe atomically.
+icon: Database
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+The circuit breaker keeps its state — failure counts, open-until timestamps, the half-open probe — behind a small **`ResilienceStore`** interface. Swap the implementation to move that state from one process to your whole fleet.
+
+```ts
+interface ResilienceStore {
+  admit(key: string, cfg: BreakerConfig): Promise<Admission>;            // may I run? (and am I the probe?)
+  record(key: string, cfg: BreakerConfig, ok: boolean, probe: boolean): Promise<CircuitStatus>;
+  snapshot(key: string): Promise<CircuitSnapshot>;                       // read-only inspect
+}
+```
+
+<Callout type="info">
+`admit` and `record` must be **atomic** — the whole point of a distributed store is that, under concurrent load, exactly **one** instance gets the half-open probe. Every adapter below enforces that against its real engine (Lua, `SELECT … FOR UPDATE`, a SQLite transaction) and is verified by a [shared contract suite](/docs/testing#validating-a-store).
+</Callout>
+
+## In-memory (default)
+
+`InMemoryResilienceStore` ships in the core package and needs nothing. State lives in the process, so each instance trips its own breaker:
+
+```ts
+import { InMemoryResilienceStore } from '@dudousxd/nestjs-resilience';
+
+const store = new InMemoryResilienceStore(); // accepts an optional Clock for tests
+```
+
+## Distributed adapters
+
+Each adapter is its own package with the engine driver as a peer dependency. Pick one:
+
+| Package | Engine | Construct | Schema |
+| --- | --- | --- | --- |
+| `@dudousxd/nestjs-resilience-store-redis` | Redis (`ioredis`) | `new RedisResilienceStore(redis, opts?)` | none (atomic Lua) |
+| `@dudousxd/nestjs-resilience-store-typeorm` | Postgres (TypeORM) | `new TypeOrmResilienceStore(dataSource, opts?)` | `ensureSchema()` |
+| `@dudousxd/nestjs-resilience-store-prisma` | Postgres (Prisma) | `new PrismaResilienceStore(prisma, opts?)` | `ensureSchema()` |
+| `@dudousxd/nestjs-resilience-store-mikro-orm` | Postgres (MikroORM) | `new MikroOrmResilienceStore(orm, opts?)` | `ensureSchema()` |
+| `@dudousxd/nestjs-resilience-store-drizzle` | SQLite (better-sqlite3) | `new DrizzleResilienceStore(db, opts?)` | exported schema |
+
+<Tabs items={['Redis', 'TypeORM', 'Prisma', 'MikroORM', 'Drizzle']}>
+<Tab value="Redis">
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-store-redis ioredis
+```
+
+```ts
+import Redis from 'ioredis';
+import { RedisResilienceStore } from '@dudousxd/nestjs-resilience-store-redis';
+
+const store = new RedisResilienceStore(new Redis(process.env.REDIS_URL), {
+  keyPrefix: 'resilience:cb:', // default
+});
+```
+
+`admit`/`record` each run as a single atomic Lua script — no schema, no migration.
+
+</Tab>
+<Tab value="TypeORM">
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-store-typeorm typeorm
+```
+
+```ts
+import { TypeOrmResilienceStore } from '@dudousxd/nestjs-resilience-store-typeorm';
+
+const store = new TypeOrmResilienceStore(dataSource);
+await store.ensureSchema(); // create the circuits table once on boot
+```
+
+Atomicity uses a transaction with `SELECT … FOR UPDATE`. Prefer migrations? Import the `CIRCUITS_DDL` string instead of calling `ensureSchema()`.
+
+</Tab>
+<Tab value="Prisma">
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-store-prisma @prisma/client
+```
+
+```ts
+import { PrismaResilienceStore } from '@dudousxd/nestjs-resilience-store-prisma';
+
+const store = new PrismaResilienceStore(prisma);
+await store.ensureSchema();
+```
+
+The store duck-types the client (`$transaction` / `$executeRawUnsafe` / `$queryRawUnsafe`), so it works across Prisma 5–7 without importing your generated client.
+
+</Tab>
+<Tab value="MikroORM">
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-store-mikro-orm @mikro-orm/core @mikro-orm/postgresql
+```
+
+```ts
+import { MikroOrmResilienceStore } from '@dudousxd/nestjs-resilience-store-mikro-orm';
+
+const store = new MikroOrmResilienceStore(orm);
+await store.ensureSchema();
+```
+
+Uses `em.transactional()` — make sure transactions aren't disabled on your config.
+
+</Tab>
+<Tab value="Drizzle">
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-store-drizzle drizzle-orm better-sqlite3
+```
+
+```ts
+import { DrizzleResilienceStore, resilienceSchema } from '@dudousxd/nestjs-resilience-store-drizzle';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
+
+const db = drizzle(new Database('app.db'), { schema: resilienceSchema });
+const store = new DrizzleResilienceStore(db);
+```
+
+SQLite-backed with synchronous transactions. The package exports `circuits`, `resilienceSchema`, and `CIRCUITS_DDL` for your migrations.
+
+</Tab>
+</Tabs>
+
+## Wiring a store
+
+Pass the store to the module — every breaker and decorator then shares it:
+
+```ts
+ResilienceModule.forRootAsync({
+  inject: [Redis],
+  useFactory: (redis: Redis) => ({ store: new RedisResilienceStore(redis) }),
+});
+```
+
+…or to an individual `circuitBreaker({ store, … })` / `failover({ policy: () => circuitBreaker({ store, … }) })`.
+
+<Callout type="info">
+All adapters share one type, `BreakerConfig` (`threshold`, `cooldownMs`, `halfOpenMax?`) — the same options you pass to `circuitBreaker`. Bring your own engine by implementing the three methods and validating it against the [contract suite](/docs/testing#validating-a-store).
+</Callout>

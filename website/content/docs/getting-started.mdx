@@ -1,0 +1,112 @@
+---
+title: Getting Started
+description: Install nestjs-resilience, wrap a flaky call with a composed policy, then register the module and use it through dependency injection.
+icon: Rocket
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Getting `nestjs-resilience` running is three steps: install the package, compose a policy, and (optionally) register `ResilienceModule.forRoot()` so you can reach the policies through DI. You can use the policies entirely standalone — the NestJS surfaces are a convenience, not a requirement.
+
+---
+
+## Prerequisites
+
+- **Node.js 20+**
+- **NestJS 10+** (both v10 and v11 are supported)
+- **TypeScript 5+** with `experimentalDecorators` and `emitDecoratorMetadata` enabled
+
+---
+
+<Steps>
+<Step>
+
+## Install
+
+```bash
+pnpm add @dudousxd/nestjs-resilience
+```
+
+`@nestjs/common` and `@nestjs/core` are peer dependencies — you already have them in a NestJS app. `@dudousxd/nestjs-diagnostics` is an **optional** peer: install it only if you want state transitions on the diagnostics channel (see [Integrations](/docs/integrations)).
+
+</Step>
+<Step>
+
+## Wrap a call with a policy
+
+Every policy exposes `execute(fn)`. Compose several with `wrap()` — outermost first — and run your operation inside:
+
+```ts
+import { wrap, timeout, retry, exponential, circuitBreaker, InMemoryResilienceStore } from '@dudousxd/nestjs-resilience';
+
+const store = new InMemoryResilienceStore();
+
+const charge = wrap(
+  timeout(2_000),                                              // give up after 2s
+  retry({ attempts: 3, backoff: exponential(100) }),          // up to 3 tries, 100ms→200ms→400ms
+  circuitBreaker({ key: 'payments', store, threshold: 5, cooldownMs: 30_000 }),
+);
+
+const result = await charge.execute(() => chargeCard(order));
+```
+
+Your function receives a `PolicyContext` (`{ signal, attempt }`) if you want it — wire the `AbortSignal` into `fetch`/your client to make timeouts actually cancel work:
+
+```ts
+await charge.execute(({ signal }) => fetch(url, { signal }));
+```
+
+</Step>
+<Step>
+
+## Register the module (optional)
+
+To reach policies through DI — and to enable the diagnostics emission — register the module once. It's **global** by default:
+
+```ts title="app.module.ts"
+import { ResilienceModule, retry, exponential, timeout, wrap } from '@dudousxd/nestjs-resilience';
+
+@Module({
+  imports: [
+    ResilienceModule.forRoot({
+      // named policies you can run by key
+      policies: {
+        payments: () => wrap(timeout(2_000), retry({ attempts: 3, backoff: exponential(100) })),
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+Then inject `ResilienceService` and run a named policy:
+
+```ts
+import { ResilienceService } from '@dudousxd/nestjs-resilience';
+
+@Injectable()
+export class BillingService {
+  constructor(private readonly resilience: ResilienceService) {}
+
+  charge(order: Order) {
+    return this.resilience.execute('payments', () => chargeCard(order));
+  }
+}
+```
+
+</Step>
+</Steps>
+
+<Callout type="info">
+By default the module uses an in-memory store and emits diagnostics events. To share circuit state across instances, pass a distributed `store` — see [Stores](/docs/stores). To turn emission off, pass `emit: false`.
+</Callout>
+
+## Where to go next
+
+<Cards>
+  <Card title="Policies" href="/docs/policies" description="timeout, retry, circuit breaker, wrap and failover in depth — plus the typed errors." />
+  <Card title="Decorators & module" href="/docs/nest" description="@Timeout / @Retry / @CircuitBreaker, forRootAsync, and the ResilienceService API." />
+  <Card title="Stores" href="/docs/stores" description="Redis / Postgres / SQLite adapters and the ResilienceStore contract." />
+  <Card title="Testing" href="/docs/testing" description="Drive time deterministically with FakeClock; validate a custom store." />
+</Cards>

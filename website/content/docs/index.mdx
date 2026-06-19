@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: Composable resilience policies for NestJS — timeout, retry, circuit breaker and failover, with a pluggable distributed circuit-breaker store.
+icon: Zap
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+**`@dudousxd/nestjs-resilience`** is a NestJS-native resilience toolkit — composable **timeout**, **retry**, **circuit breaker** and **failover** policies, with a pluggable, distributed circuit-breaker store. Think *cockatiel for NestJS*, wired into the ecosystem's conventions ([diagnostics](https://github.com/DavideCarvalho/nestjs-diagnostics), [context](https://github.com/DavideCarvalho/nestjs-context), event-emitter).
+
+<Callout type="info" title="Alpha">
+Published as alpha at `0.2.0`. The API here matches the current source. Pin a version in production.
+</Callout>
+
+## Compose policies, outer to inner
+
+Each policy is a small object with an `execute(fn)` method. `wrap()` composes them — the **first** argument is the outermost layer, the last is closest to your operation:
+
+```ts
+import { wrap, timeout, retry, exponential, circuitBreaker, InMemoryResilienceStore } from '@dudousxd/nestjs-resilience';
+
+const store = new InMemoryResilienceStore();
+
+const policy = wrap(
+  timeout(2_000),
+  retry({ attempts: 3, backoff: exponential(100) }),
+  circuitBreaker({ key: 'payments', store, threshold: 5, cooldownMs: 30_000 }),
+);
+
+await policy.execute(() => chargeCard(order)); // timeout → retry → breaker → chargeCard
+```
+
+## Three ways to use it
+
+<Cards>
+  <Card title="Programmatic policies" href="/docs/policies" description="Build and compose timeout / retry / circuit-breaker / failover by hand." />
+  <Card title="Decorators & module" href="/docs/nest" description="@Timeout / @Retry / @CircuitBreaker on provider methods, plus ResilienceService and named policies." />
+  <Card title="Distributed stores" href="/docs/stores" description="Share circuit state fleet-wide on Redis, Postgres or SQLite — one ResilienceStore contract." />
+</Cards>
+
+## Wired into the ecosystem
+
+State transitions (circuit opened/closed/half-open, short-circuited, timeout, retry, failover) emit over [`@dudousxd/nestjs-diagnostics`](https://github.com/DavideCarvalho/nestjs-diagnostics) on the `aviary:resilience:*` channel — so [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) or any subscriber can observe them. An optional `@nestjs/event-emitter` mirror lets you react in-app, and [`@dudousxd/nestjs-context`](https://github.com/DavideCarvalho/nestjs-context) makes breaker keys tenant-aware automatically. See [Integrations](/docs/integrations).
+
+## Install
+
+```bash
+pnpm add @dudousxd/nestjs-resilience
+```
+
+`@nestjs/common` and `@nestjs/core` are peer dependencies; `@dudousxd/nestjs-diagnostics` is an optional, soft-detected one. Head to [Getting Started](/docs/getting-started).

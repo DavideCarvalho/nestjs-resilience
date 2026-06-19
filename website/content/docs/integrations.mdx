@@ -1,0 +1,97 @@
+---
+title: Integrations
+description: Emit state transitions over nestjs-diagnostics, mirror them onto @nestjs/event-emitter, and make breaker keys tenant-aware through nestjs-context — all soft-detected and optional.
+icon: Activity
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Resilience plugs into the rest of the ecosystem through **event sinks** and a **context** accessor. Every integration is optional and soft-detected — nothing is a hard dependency.
+
+## Events
+
+Every state transition is a `ResilienceEvent` handed to an `EventSink`:
+
+```ts
+type ResilienceEventType =
+  | 'circuit-opened' | 'circuit-closed' | 'circuit-half-open'
+  | 'short-circuited' | 'failover' | 'timeout' | 'retry';
+
+interface ResilienceEvent {
+  type: ResilienceEventType;
+  key?: string;          // the breaker key, when applicable
+  [extra: string]: unknown; // e.g. failover carries target / index / error
+}
+
+type EventSink = (event: ResilienceEvent) => void;
+```
+
+Pass `onEvent` to any policy, or let the module wire the sinks for you. Combine several with `combineSinks`:
+
+```ts
+import { circuitBreaker, combineSinks, diagnosticsSink, eventEmitterSink } from '@dudousxd/nestjs-resilience';
+
+circuitBreaker({
+  key: 'payments',
+  store,
+  threshold: 5,
+  cooldownMs: 30_000,
+  onEvent: combineSinks(diagnosticsSink(), eventEmitterSink(emitter)),
+});
+```
+
+## Diagnostics
+
+`diagnosticsSink()` routes each event to [`@dudousxd/nestjs-diagnostics`](https://github.com/DavideCarvalho/nestjs-diagnostics) on the **`aviary:resilience:<type>`** channel — so [Telescope](https://github.com/DavideCarvalho/nestjs-telescope), OpenTelemetry, or any subscriber can observe circuit and failover activity. It's a no-op when diagnostics isn't installed.
+
+```ts
+ResilienceModule.forRoot({ emit: true }); // default — installs diagnosticsSink for you
+```
+
+The module wires this automatically; you only call `diagnosticsSink()` by hand when composing `onEvent` on a standalone policy.
+
+## Event-emitter mirror
+
+To react to transitions **inside your app** — invalidate a cache when a circuit opens, page on repeated failovers — mirror events onto `@nestjs/event-emitter`:
+
+```ts
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+ResilienceModule.forRootAsync({
+  inject: [EventEmitter2],
+  useFactory: (emitter: EventEmitter2) => ({ eventEmitter: emitter }),
+});
+```
+
+Event names are derived by `resilienceEventName(type)` — dots replace dashes, under a `resilience.` prefix:
+
+```ts
+@OnEvent('resilience.circuit.opened')
+onCircuitOpen(event: ResilienceEvent) {
+  this.logger.warn(`circuit ${event.key} opened`);
+}
+// 'circuit-opened'  → 'resilience.circuit.opened'
+// 'short-circuited' → 'resilience.short.circuited'
+// 'failover'        → 'resilience.failover'
+```
+
+<Callout type="info">
+`EventEmitterLike` is structural — anything with `emit(event, ...values)` works, so you're not tied to `@nestjs/event-emitter` specifically.
+</Callout>
+
+## Tenant-aware circuit keys
+
+In a multi-tenant app you usually want a circuit **per tenant** — one tenant's failing provider shouldn't trip the breaker for everyone. `tenantSuffix()` reads the current tenant from [`@dudousxd/nestjs-context`](https://github.com/DavideCarvalho/nestjs-context) (via a shared `Symbol`, returning `undefined` when context isn't present), so you can fold it into the key:
+
+```ts
+import { circuitBreaker, tenantSuffix } from '@dudousxd/nestjs-resilience';
+
+circuitBreaker({
+  key: `payments:${tenantSuffix() ?? 'global'}`,
+  store,
+  threshold: 5,
+  cooldownMs: 30_000,
+});
+```
+
+Because the key carries the tenant, a distributed [store](/docs/stores) keeps each tenant's circuit isolated and fleet-wide at the same time.
