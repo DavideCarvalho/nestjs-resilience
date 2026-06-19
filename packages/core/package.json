@@ -1,6 +1,6 @@
 {
   "name": "@dudousxd/nestjs-resilience",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -12,8 +12,14 @@
       "require": "./dist/index.cjs"
     },
     "./testing": {
-      "import": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" },
-      "require": { "types": "./dist/testing.d.cts", "default": "./dist/testing.cjs" }
+      "import": {
+        "types": "./dist/testing.d.ts",
+        "default": "./dist/testing.js"
+      },
+      "require": {
+        "types": "./dist/testing.d.cts",
+        "default": "./dist/testing.cjs"
+      }
     }
   },
   "files": [
@@ -25,7 +31,9 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@dudousxd/nestjs-diagnostics": ">=0.2.0 <1",
     "@nestjs/common": "^10 || ^11",
