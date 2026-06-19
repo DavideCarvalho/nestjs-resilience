@@ -43,8 +43,10 @@ describe('ResilienceWatcher', () => {
     cleanup = () => watcher.cleanup();
 
     emit('authz', 'decision', { allow: true });
+    emit('resilience', 'circuit-opened', { type: 'circuit-opened', key: 'p' });
 
-    expect(recorded).toHaveLength(0);
+    expect(recorded).toHaveLength(1);
+    expect((recorded[0]?.content as ResilienceEntryContent).event).toBe('circuit-opened');
   });
 
   it('subscribes to a resilience channel registered before register()', async () => {
@@ -84,6 +86,7 @@ describe('ResilienceWatcher', () => {
 
     emit('resilience', 'circuit-closed', { type: 'circuit-closed', key: 'payments' });
 
+    expect(recorded).toHaveLength(1);
     expect(recorded[0]?.tags).not.toContain('failed');
   });
 
