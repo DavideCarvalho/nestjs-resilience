@@ -29,14 +29,14 @@ type EventSink = (event: ResilienceEvent) => void;
 Pass `onEvent` to any policy, or let the module wire the sinks for you. Combine several with `combineSinks`:
 
 ```ts
-import { circuitBreaker, combineSinks, diagnosticsSink, eventEmitterSink } from '@dudousxd/nestjs-resilience';
+import { circuitBreaker, combineSinks, diagnosticsSink } from '@dudousxd/nestjs-resilience';
 
 circuitBreaker({
   key: 'payments',
   store,
   threshold: 5,
   cooldownMs: 30_000,
-  onEvent: combineSinks(diagnosticsSink(), eventEmitterSink(emitter)),
+  onEvent: combineSinks(diagnosticsSink(), (event) => logger.warn(`resilience: ${event.type} ${event.key ?? ''}`)),
 });
 ```
 
@@ -63,33 +63,30 @@ TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] });
 
 It subscribes to the `aviary:resilience:*` channels, so it needs nothing beyond the default `emit: true` — and costs nothing until resilience emits.
 
-## Event-emitter mirror
+## Reacting in-app
 
-To react to transitions **inside your app** — invalidate a cache when a circuit opens, page on repeated failovers — mirror events onto `@nestjs/event-emitter`:
-
-```ts
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
-ResilienceModule.forRootAsync({
-  inject: [EventEmitter2],
-  useFactory: (emitter: EventEmitter2) => ({ eventEmitter: emitter }),
-});
-```
-
-Event names are derived by `resilienceEventName(type)` — dots replace dashes, under a `resilience.` prefix:
+To run logic when a transition happens — invalidate a cache when a circuit opens, page on repeated failovers — subscribe to the diagnostics channel directly. This needs **nothing beyond diagnostics** (already present whenever `emit: true` is on, the default), so there's no extra event library to install:
 
 ```ts
-@OnEvent('resilience.circuit.opened')
-onCircuitOpen(event: ResilienceEvent) {
-  this.logger.warn(`circuit ${event.key} opened`);
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { getChannel, type DiagnosticEvent } from '@dudousxd/nestjs-diagnostics';
+import type { ResilienceEvent } from '@dudousxd/nestjs-resilience';
+
+@Injectable()
+export class CircuitReactions implements OnModuleInit {
+  onModuleInit() {
+    getChannel('resilience', 'circuit-opened').subscribe((msg) => {
+      const event = (msg as DiagnosticEvent).payload as ResilienceEvent;
+      this.cache.invalidate(event.key);
+    });
+  }
 }
-// 'circuit-opened'  → 'resilience.circuit.opened'
-// 'short-circuited' → 'resilience.short.circuited'
-// 'failover'        → 'resilience.failover'
 ```
+
+There's one channel per [`ResilienceEventType`](#events) under `aviary:resilience:<type>` — subscribe to each you care about (`circuit-opened`, `short-circuited`, `failover`, …).
 
 <Callout type="info">
-`EventEmitterLike` is structural — anything with `emit(event, ...values)` works, so you're not tied to `@nestjs/event-emitter` specifically.
+Prefer raw `onEvent` sinks over the diagnostics channel? Pass any `EventSink` (or `combineSinks(...)`) to a policy — see [Events](#events) above. Either way you stay on one event stream that observability tools read too.
 </Callout>
 
 ## Tenant-aware circuit keys
