@@ -7,3 +7,8 @@ allowBuilds:
   '@prisma/client': true
   prisma: true
   '@prisma/engines': true
+  # Transitive native deps (via testcontainers' ssh2) we don't need built — declared
+  # so pnpm 11 doesn't fail CI with ERR_PNPM_IGNORED_BUILDS.
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
