@@ -12,7 +12,7 @@ open circuits, recent failovers, most-tripped circuits, and a table of recent tr
 ## Install
 
 ```bash
-pnpm add @dudousxd/nestjs-resilience-telescope
+pnpm add @dudousxd/nestjs-resilience-telescope @dudousxd/nestjs-telescope
 ```
 
 Requires `@dudousxd/nestjs-telescope` (peer) and `@dudousxd/nestjs-diagnostics`. Make sure resilience

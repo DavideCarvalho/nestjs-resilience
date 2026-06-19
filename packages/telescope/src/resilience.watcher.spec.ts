@@ -1,7 +1,8 @@
 import { emit, resetRegistry, setContextAccessor } from '@dudousxd/nestjs-diagnostics';
 import { collectWatcherEntries } from '@dudousxd/nestjs-telescope-testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { type ResilienceEntryContent, ResilienceWatcher } from './resilience.watcher';
+import { type ResilienceEntryContent, ResilienceWatcher, isResilienceEvent } from './resilience.watcher';
+import diagnostics_channel from 'node:diagnostics_channel';
 
 describe('ResilienceWatcher', () => {
   let cleanup: (() => void) | undefined;
@@ -115,5 +116,32 @@ describe('ResilienceWatcher', () => {
     emit('resilience', 'circuit-opened', { type: 'circuit-opened', key: 'x' });
 
     expect(recorded).toHaveLength(0);
+  });
+
+  it('ignores a malformed message on a subscribed channel without throwing', async () => {
+    const watcher = new ResilienceWatcher();
+    const { recorded } = await collectWatcherEntries(watcher);
+    cleanup = () => watcher.cleanup();
+
+    emit('resilience', 'circuit-opened', { type: 'circuit-opened', key: 'a' }); // subscribes + records (1)
+    expect(() =>
+      diagnostics_channel.channel('aviary:resilience:circuit-opened').publish('not-an-envelope'),
+    ).not.toThrow();
+
+    expect(recorded).toHaveLength(1); // the malformed publish produced no extra record
+  });
+});
+
+describe('isResilienceEvent', () => {
+  it('accepts a well-formed resilience envelope', () => {
+    expect(isResilienceEvent({ ts: 1, lib: 'resilience', event: 'circuit-opened', payload: {} })).toBe(true);
+  });
+
+  it('rejects malformed or non-resilience envelopes', () => {
+    expect(isResilienceEvent(null)).toBe(false);
+    expect(isResilienceEvent({})).toBe(false);
+    expect(isResilienceEvent({ ts: 1, lib: 'authz', event: 'x', payload: {} })).toBe(false); // wrong lib
+    expect(isResilienceEvent({ ts: 'no', lib: 'resilience', event: 'x', payload: {} })).toBe(false); // ts not number
+    expect(isResilienceEvent({ ts: 1, lib: 'resilience', event: 'x' })).toBe(false); // no payload
   });
 });
