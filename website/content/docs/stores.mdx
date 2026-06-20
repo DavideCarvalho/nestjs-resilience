@@ -50,12 +50,18 @@ Each adapter is its own package with the engine driver as a peer dependency. Pic
 pnpm add @dudousxd/nestjs-resilience-store-redis ioredis
 ```
 
-```ts
+```ts title="app.module.ts"
 import Redis from 'ioredis';
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
 import { RedisResilienceStore } from '@dudousxd/nestjs-resilience-store-redis';
 
-const store = new RedisResilienceStore(new Redis(process.env.REDIS_URL), {
-  keyPrefix: 'resilience:cb:', // default
+ResilienceModule.forRootAsync({
+  inject: [Redis],
+  useFactory: (redis: Redis) => ({
+    store: new RedisResilienceStore(redis, {
+      keyPrefix: 'resilience:cb:', // default
+    }),
+  }),
 });
 ```
 
@@ -68,11 +74,19 @@ const store = new RedisResilienceStore(new Redis(process.env.REDIS_URL), {
 pnpm add @dudousxd/nestjs-resilience-store-typeorm typeorm
 ```
 
-```ts
+```ts title="app.module.ts"
+import { DataSource } from 'typeorm';
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
 import { TypeOrmResilienceStore } from '@dudousxd/nestjs-resilience-store-typeorm';
 
-const store = new TypeOrmResilienceStore(dataSource);
-await store.ensureSchema(); // create the circuits table once on boot
+ResilienceModule.forRootAsync({
+  inject: [DataSource],
+  useFactory: async (dataSource: DataSource) => {
+    const store = new TypeOrmResilienceStore(dataSource);
+    await store.ensureSchema(); // create the circuits table once on boot
+    return { store };
+  },
+});
 ```
 
 Atomicity uses a transaction with `SELECT … FOR UPDATE`. Prefer migrations? Import the `CIRCUITS_DDL` string instead of calling `ensureSchema()`.
@@ -84,11 +98,19 @@ Atomicity uses a transaction with `SELECT … FOR UPDATE`. Prefer migrations? Im
 pnpm add @dudousxd/nestjs-resilience-store-prisma @prisma/client
 ```
 
-```ts
+```ts title="app.module.ts"
+import { PrismaService } from './prisma.service';
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
 import { PrismaResilienceStore } from '@dudousxd/nestjs-resilience-store-prisma';
 
-const store = new PrismaResilienceStore(prisma);
-await store.ensureSchema();
+ResilienceModule.forRootAsync({
+  inject: [PrismaService],
+  useFactory: async (prisma: PrismaService) => {
+    const store = new PrismaResilienceStore(prisma);
+    await store.ensureSchema();
+    return { store };
+  },
+});
 ```
 
 The store duck-types the client (`$transaction` / `$executeRawUnsafe` / `$queryRawUnsafe`), so it works across Prisma 5–7 without importing your generated client.
@@ -100,11 +122,19 @@ The store duck-types the client (`$transaction` / `$executeRawUnsafe` / `$queryR
 pnpm add @dudousxd/nestjs-resilience-store-mikro-orm @mikro-orm/core @mikro-orm/postgresql
 ```
 
-```ts
+```ts title="app.module.ts"
+import { MikroORM } from '@mikro-orm/core';
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
 import { MikroOrmResilienceStore } from '@dudousxd/nestjs-resilience-store-mikro-orm';
 
-const store = new MikroOrmResilienceStore(orm);
-await store.ensureSchema();
+ResilienceModule.forRootAsync({
+  inject: [MikroORM],
+  useFactory: async (orm: MikroORM) => {
+    const store = new MikroOrmResilienceStore(orm);
+    await store.ensureSchema();
+    return { store };
+  },
+});
 ```
 
 Uses `em.transactional()` — make sure transactions aren't disabled on your config.
@@ -116,13 +146,18 @@ Uses `em.transactional()` — make sure transactions aren't disabled on your con
 pnpm add @dudousxd/nestjs-resilience-store-drizzle drizzle-orm better-sqlite3
 ```
 
-```ts
+```ts title="app.module.ts"
+import { ResilienceModule } from '@dudousxd/nestjs-resilience';
 import { DrizzleResilienceStore, resilienceSchema } from '@dudousxd/nestjs-resilience-store-drizzle';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 
-const db = drizzle(new Database('app.db'), { schema: resilienceSchema });
-const store = new DrizzleResilienceStore(db);
+ResilienceModule.forRootAsync({
+  useFactory: () => {
+    const db = drizzle(new Database('app.db'), { schema: resilienceSchema });
+    return { store: new DrizzleResilienceStore(db) };
+  },
+});
 ```
 
 SQLite-backed with synchronous transactions. The package exports `circuits`, `resilienceSchema`, and `CIRCUITS_DDL` for your migrations.
