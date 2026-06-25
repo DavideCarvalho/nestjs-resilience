@@ -20,6 +20,6 @@ describe('diagnosticsSink', () => {
   });
 
   it('is a no-op when nobody is subscribed (never throws)', () => {
-    expect(() => diagnosticsSink()({ type: 'timeout', key: 'k', ms: 100 })).not.toThrow();
+    expect(() => diagnosticsSink()({ type: 'short-circuited', key: 'k', ms: 100 })).not.toThrow();
   });
 });
