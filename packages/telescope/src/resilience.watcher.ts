@@ -14,16 +14,14 @@ export const RESILIENCE_ENTRY_TYPE = 'resilience';
 const RESILIENCE_CHANNEL_PREFIX = `${CHANNEL_PREFIX}:resilience:`;
 
 /** Transitions worth a red `failed` tag in the dashboard. */
-const FAILED_EVENTS: ReadonlySet<string> = new Set(['circuit-opened', 'short-circuited', 'timeout']);
+const FAILED_EVENTS: ReadonlySet<string> = new Set(['circuit-opened', 'short-circuited']);
 
 export type ResilienceEventType =
   | 'circuit-opened'
   | 'circuit-closed'
   | 'circuit-half-open'
   | 'short-circuited'
-  | 'failover'
-  | 'timeout'
-  | 'retry';
+  | 'failover';
 
 /** What a recorded resilience entry looks like in the dashboard. */
 export interface ResilienceEntryContent {
