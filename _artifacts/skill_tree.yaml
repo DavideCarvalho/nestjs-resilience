@@ -1,0 +1,32 @@
+# Skill tree — nestjs-resilience. Flat structure, no router (each package has <5 skills).
+library: "@dudousxd/nestjs-resilience"
+structure: flat
+skills:
+  - name: resilience-policies
+    package: "@dudousxd/nestjs-resilience"
+    package_dir: packages/core
+    path: packages/core/skills/resilience-policies/SKILL.md
+    type: core
+  - name: resilience-nestjs
+    package: "@dudousxd/nestjs-resilience"
+    package_dir: packages/core
+    path: packages/core/skills/resilience-nestjs/SKILL.md
+    type: framework
+    requires:
+      - "@nestjs/common"
+      - "@nestjs/core"
+  - name: resilience-store
+    package: "@dudousxd/nestjs-resilience"
+    package_dir: packages/core
+    path: packages/core/skills/resilience-store/SKILL.md
+    type: core
+  - name: resilience-store-redis
+    package: "@dudousxd/nestjs-resilience-store-redis"
+    package_dir: packages/store-redis
+    path: packages/store-redis/skills/resilience-store-redis/SKILL.md
+    type: core
+  - name: resilience-telescope
+    package: "@dudousxd/nestjs-resilience-telescope"
+    package_dir: packages/telescope
+    path: packages/telescope/skills/resilience-telescope/SKILL.md
+    type: core

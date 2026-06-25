@@ -9,7 +9,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "exports": {
     ".": {
@@ -38,10 +39,14 @@
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
+    "@tanstack/intent": "^0.3.2",
     "@testcontainers/redis": "^10.18.0",
     "ioredis": "^5.4.2",
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3"
-  }
+  },
+  "keywords": [
+    "tanstack-intent"
+  ]
 }

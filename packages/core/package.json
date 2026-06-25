@@ -24,7 +24,8 @@
   },
   "files": [
     "dist",
-    "LICENSE"
+    "LICENSE",
+    "skills"
   ],
   "scripts": {
     "build": "tsup",
@@ -50,11 +51,15 @@
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
     "@nestjs/testing": "^11",
+    "@tanstack/intent": "^0.3.2",
     "@types/node": "^22",
     "reflect-metadata": "^0.2",
     "rxjs": "^7",
     "tsup": "^8",
     "typescript": "^5.6",
     "vitest": "^3"
-  }
+  },
+  "keywords": [
+    "tanstack-intent"
+  ]
 }
