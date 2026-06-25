@@ -40,7 +40,7 @@ await policy.execute(() => chargeCard(order)); // timeout → retry → breaker 
 
 ## Wired into the ecosystem
 
-State transitions (circuit opened/closed/half-open, short-circuited, timeout, retry, failover) emit over [`@dudousxd/nestjs-diagnostics`](https://github.com/DavideCarvalho/nestjs-diagnostics) on the `aviary:resilience:*` channel — so [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) or any subscriber can observe them. An optional `@nestjs/event-emitter` mirror lets you react in-app, and [`@dudousxd/nestjs-context`](https://github.com/DavideCarvalho/nestjs-context) makes breaker keys tenant-aware automatically. See [Integrations](/docs/integrations).
+State transitions (circuit opened/closed/half-open, short-circuited, failover) emit over [`@dudousxd/nestjs-diagnostics`](https://github.com/DavideCarvalho/nestjs-diagnostics) on the `aviary:resilience:*` channel — so [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) or any subscriber can observe them. An optional `@nestjs/event-emitter` mirror lets you react in-app, and [`@dudousxd/nestjs-context`](https://github.com/DavideCarvalho/nestjs-context) makes breaker keys tenant-aware automatically. See [Integrations](/docs/integrations).
 
 ## Install
 
