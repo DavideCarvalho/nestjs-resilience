@@ -100,13 +100,14 @@ export function isResilienceEvent(msg: unknown): msg is DiagnosticEvent {
 
 /** Map a resilience envelope to a Telescope `RecordInput`. */
 export function buildResilienceEntry(msg: DiagnosticEvent): RecordInput<ResilienceEntryContent> {
-  const payload = (typeof msg.payload === 'object' && msg.payload !== null ? msg.payload : {}) as Record<
-    string,
-    unknown
-  >;
+  const payload = (
+    typeof msg.payload === 'object' && msg.payload !== null ? msg.payload : {}
+  ) as Record<string, unknown>;
   const key = typeof payload.key === 'string' ? payload.key : null;
-  const target = payload.target === undefined || payload.target === null ? null : String(payload.target);
-  const index = typeof payload.index === 'number' && Number.isFinite(payload.index) ? payload.index : null;
+  const target =
+    payload.target === undefined || payload.target === null ? null : String(payload.target);
+  const index =
+    typeof payload.index === 'number' && Number.isFinite(payload.index) ? payload.index : null;
   const rawError = payload.error;
   const error =
     rawError === undefined || rawError === null
