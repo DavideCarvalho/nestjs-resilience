@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
-    "@tanstack/intent": "^0.3.2",
     "@testcontainers/redis": "^10.18.0",
     "ioredis": "^5.4.2",
     "tsup": "^8",

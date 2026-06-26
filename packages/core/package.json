@@ -51,7 +51,6 @@
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
     "@nestjs/testing": "^11",
-    "@tanstack/intent": "^0.3.2",
     "@types/node": "^22",
     "reflect-metadata": "^0.2",
     "rxjs": "^7",

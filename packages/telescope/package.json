@@ -42,7 +42,6 @@
   "devDependencies": {
     "@dudousxd/nestjs-telescope": "^1.11.0",
     "@dudousxd/nestjs-telescope-testing": "^1.11.0",
-    "@tanstack/intent": "^0.3.2",
     "@types/node": "^22",
     "tsup": "^8",
     "typescript": "^5.9.3",
