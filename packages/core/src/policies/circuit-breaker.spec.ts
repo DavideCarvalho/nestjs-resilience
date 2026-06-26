@@ -4,7 +4,12 @@ import { FakeClock } from '../clock';
 import { BrokenCircuitError } from '../errors';
 import { circuitBreaker } from './circuit-breaker';
 
-const base = (store: InMemoryResilienceStore) => ({ key: 'k', store, threshold: 3, cooldownMs: 1000 });
+const base = (store: InMemoryResilienceStore) => ({
+  key: 'k',
+  store,
+  threshold: 3,
+  cooldownMs: 1000,
+});
 
 describe('circuitBreaker', () => {
   it('passes successes through', async () => {
@@ -15,8 +20,15 @@ describe('circuitBreaker', () => {
   it('opens after threshold failures and then short-circuits with BrokenCircuitError', async () => {
     const store = new InMemoryResilienceStore(new FakeClock());
     const p = circuitBreaker(base(store));
-    for (let i = 0; i < 3; i++) await p.execute(async () => { throw new Error('boom'); }).catch(() => {});
-    await expect(p.execute(async () => 'should-not-run')).rejects.toBeInstanceOf(BrokenCircuitError);
+    for (let i = 0; i < 3; i++)
+      await p
+        .execute(async () => {
+          throw new Error('boom');
+        })
+        .catch(() => {});
+    await expect(p.execute(async () => 'should-not-run')).rejects.toBeInstanceOf(
+      BrokenCircuitError,
+    );
   });
 
   it('emits circuit-opened / short-circuited / circuit-closed', async () => {
@@ -24,7 +36,12 @@ describe('circuitBreaker', () => {
     const store = new InMemoryResilienceStore(clock);
     const onEvent = vi.fn();
     const p = circuitBreaker({ ...base(store), onEvent });
-    for (let i = 0; i < 3; i++) await p.execute(async () => { throw new Error('x'); }).catch(() => {});
+    for (let i = 0; i < 3; i++)
+      await p
+        .execute(async () => {
+          throw new Error('x');
+        })
+        .catch(() => {});
     await p.execute(async () => 'x').catch(() => {});
     clock.advance(1000);
     await p.execute(async () => 'ok'); // probe succeeds → closed

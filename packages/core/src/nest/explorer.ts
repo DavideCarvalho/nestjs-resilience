@@ -29,12 +29,17 @@ export class ResilienceExplorer implements OnModuleInit {
       this.wrapped.add(instance);
       const proto = Object.getPrototypeOf(instance);
       for (const methodName of this.scanner.getAllMethodNames(proto)) {
-        const metas: PolicyMeta[] | undefined = Reflect.getMetadata(RESILIENCE_META, proto, methodName);
+        const metas: PolicyMeta[] | undefined = Reflect.getMetadata(
+          RESILIENCE_META,
+          proto,
+          methodName,
+        );
         if (!metas?.length) continue;
         const className = wrapper.metatype?.name ?? 'Provider';
         const policy = this.buildPolicy(metas, `${className}.${methodName}`);
         const original = instance[methodName] as (...args: unknown[]) => Promise<unknown>;
-        instance[methodName] = (...args: unknown[]) => policy.execute(() => original.apply(instance, args));
+        instance[methodName] = (...args: unknown[]) =>
+          policy.execute(() => original.apply(instance, args));
       }
     }
   }

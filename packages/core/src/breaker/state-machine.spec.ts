@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { type CircuitState, INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord } from './state-machine';
+import {
+  type CircuitState,
+  INITIAL_CIRCUIT_STATE,
+  computeAdmit,
+  computeRecord,
+} from './state-machine';
 import type { BreakerConfig } from './types';
 
 const cfg: BreakerConfig = { threshold: 3, cooldownMs: 1000 };
@@ -16,13 +21,25 @@ describe('computeRecord', () => {
   });
 
   it('success resets to closed', () => {
-    const opened = computeRecord({ status: 'open', failures: 3, openUntil: 1000, probes: 0 }, cfg, true, false, 0);
+    const opened = computeRecord(
+      { status: 'open', failures: 3, openUntil: 1000, probes: 0 },
+      cfg,
+      true,
+      false,
+      0,
+    );
     expect(opened.status).toBe('closed');
     expect(opened.state).toEqual({ status: 'closed', failures: 0, openUntil: 0, probes: 0 });
   });
 
   it('probe failure re-opens', () => {
-    const r = computeRecord({ status: 'half-open', failures: 3, openUntil: 0, probes: 1 }, cfg, false, true, 500);
+    const r = computeRecord(
+      { status: 'half-open', failures: 3, openUntil: 0, probes: 1 },
+      cfg,
+      false,
+      true,
+      500,
+    );
     expect(r.status).toBe('open');
     expect(r.state.openUntil).toBe(1500);
     expect(r.state.probes).toBe(0);
@@ -31,7 +48,11 @@ describe('computeRecord', () => {
 
 describe('computeAdmit', () => {
   it('closed allows without a probe', () => {
-    expect(computeAdmit(fresh(), cfg, 0).admission).toEqual({ allow: true, probe: false, status: 'closed' });
+    expect(computeAdmit(fresh(), cfg, 0).admission).toEqual({
+      allow: true,
+      probe: false,
+      status: 'closed',
+    });
   });
 
   it('open denies before cooldown', () => {

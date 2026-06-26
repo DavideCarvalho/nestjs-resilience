@@ -9,7 +9,11 @@ import {
   type TelescopeExtension,
   type Watcher,
 } from '@dudousxd/nestjs-telescope';
-import { RESILIENCE_ENTRY_TYPE, type ResilienceEntryContent, ResilienceWatcher } from './resilience.watcher';
+import {
+  RESILIENCE_ENTRY_TYPE,
+  type ResilienceEntryContent,
+  ResilienceWatcher,
+} from './resilience.watcher';
 
 const OPEN_CIRCUITS_PROVIDER = 'resilience.openCircuits';
 const FAILOVERS_PROVIDER = 'resilience.failovers';
@@ -32,7 +36,9 @@ export interface ResilienceTelescopeOptions {
  * TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] });
  * ```
  */
-export function nestjsResilienceTelescope(options: ResilienceTelescopeOptions = {}): TelescopeExtension {
+export function nestjsResilienceTelescope(
+  options: ResilienceTelescopeOptions = {},
+): TelescopeExtension {
   const topKeysLimit = options.topKeysLimit ?? 10;
   const recentLimit = options.recentLimit ?? 50;
 

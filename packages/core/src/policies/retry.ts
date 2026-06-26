@@ -3,7 +3,10 @@ import { type Operation, type Policy, type PolicyContext, rootContext } from '..
 
 export type Backoff = (attempt: number) => number;
 
-export function exponential(baseMs: number, opts: { jitter?: boolean; factor?: number } = {}): Backoff {
+export function exponential(
+  baseMs: number,
+  opts: { jitter?: boolean; factor?: number } = {},
+): Backoff {
   const factor = opts.factor ?? 2;
   return (attempt) => {
     const raw = baseMs * factor ** attempt;

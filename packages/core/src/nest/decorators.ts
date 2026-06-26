@@ -2,9 +2,22 @@ import type { Backoff } from '../policies/retry';
 
 export const RESILIENCE_META = Symbol('resilience:meta');
 
-export interface TimeoutMeta { kind: 'timeout'; ms: number }
-export interface RetryMeta { kind: 'retry'; attempts: number; backoff?: Backoff }
-export interface CircuitMeta { kind: 'circuit'; threshold: number; cooldownMs: number; key?: string; halfOpenMax?: number }
+export interface TimeoutMeta {
+  kind: 'timeout';
+  ms: number;
+}
+export interface RetryMeta {
+  kind: 'retry';
+  attempts: number;
+  backoff?: Backoff;
+}
+export interface CircuitMeta {
+  kind: 'circuit';
+  threshold: number;
+  cooldownMs: number;
+  key?: string;
+  halfOpenMax?: number;
+}
 export type PolicyMeta = TimeoutMeta | RetryMeta | CircuitMeta;
 
 function push(target: object, propertyKey: string | symbol, meta: PolicyMeta): void {
@@ -19,8 +32,11 @@ export function Timeout(ms: number): MethodDecorator {
 export function Retry(opts: { attempts: number; backoff?: Backoff }): MethodDecorator {
   return (target, key) => push(target, key, { kind: 'retry', ...opts });
 }
-export function CircuitBreaker(
-  opts: { threshold: number; cooldownMs: number; key?: string; halfOpenMax?: number },
-): MethodDecorator {
+export function CircuitBreaker(opts: {
+  threshold: number;
+  cooldownMs: number;
+  key?: string;
+  halfOpenMax?: number;
+}): MethodDecorator {
   return (target, key) => push(target, key, { kind: 'circuit', ...opts });
 }

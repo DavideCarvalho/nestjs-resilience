@@ -32,7 +32,9 @@ describe('failover', () => {
   });
 
   it('applies a per-target policy', async () => {
-    const policy = vi.fn(() => ({ execute: <T>(op: any) => op({ signal: new AbortController().signal, attempt: 0 }) }));
+    const policy = vi.fn(() => ({
+      execute: <T>(op: any) => op({ signal: new AbortController().signal, attempt: 0 }),
+    }));
     await failover({ targets: ['a'], run: async () => 'ok', policy });
     expect(policy).toHaveBeenCalledWith('a');
   });
