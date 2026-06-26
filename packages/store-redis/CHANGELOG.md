@@ -1,5 +1,11 @@
 # @dudousxd/nestjs-resilience-store-redis
 
+## 0.2.1
+
+### Patch Changes
+
+- 6c6b859: Ship TanStack Intent agent skills (SKILL.md) inside the package.
+
 ## 0.2.0
 
 ### Minor Changes

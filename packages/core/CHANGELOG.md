@@ -1,5 +1,23 @@
 # @dudousxd/nestjs-resilience
 
+## 0.3.0
+
+### Minor Changes
+
+- 2681d46: Drop the dead `'timeout'` and `'retry'` members from the public `ResilienceEventType`
+  union — no policy ever emitted them (only `circuit-opened`/`circuit-closed`/`circuit-half-open`/
+  `short-circuited` and `failover` are emitted), so the type now reflects reality. `timeout` and
+  `retry` remain valid _policy_ names; only the dead event-type members are removed.
+
+  Also sync the exported `VERSION` const with `package.json` (was stale at `0.1.0`). A new
+  `scripts/sync-version.mjs` is chained into the `version` (`changeset version`) script so future
+  release bumps keep `src/index.ts` and `package.json` in lockstep; it also doubles as a `--check`
+  drift guard.
+
+### Patch Changes
+
+- 6c6b859: Ship TanStack Intent agent skills (SKILL.md) inside the package.
+
 ## 0.2.0
 
 ### Minor Changes
