@@ -6,8 +6,8 @@ import {
   resolveConfig,
 } from '@dudousxd/nestjs-telescope';
 import { describe, expect, it } from 'vitest';
-import { type ResilienceEntryContent, RESILIENCE_ENTRY_TYPE } from './resilience.watcher';
 import { nestjsResilienceTelescope } from './resilience-telescope.extension';
+import { RESILIENCE_ENTRY_TYPE, type ResilienceEntryContent } from './resilience.watcher';
 
 let seq = 0;
 
@@ -30,7 +30,9 @@ function resilienceEntry(content: ResilienceEntryContent): Entry<ResilienceEntry
   };
 }
 
-function content(partial: Partial<ResilienceEntryContent> & { event: string }): ResilienceEntryContent {
+function content(
+  partial: Partial<ResilienceEntryContent> & { event: string },
+): ResilienceEntryContent {
   return {
     event: partial.event,
     key: partial.key ?? null,
@@ -140,7 +142,9 @@ describe('nestjsResilienceTelescope extension', () => {
     const provider = nestjsResilienceTelescope({ topKeysLimit: 1 })
       .dataProviders?.(ctx)
       .find((p) => p.name === 'resilience.topKeys');
-    const result = (await provider?.resolve({ limit: 1 }, ctx)) as { items: { label: string; value: number }[] };
+    const result = (await provider?.resolve({ limit: 1 }, ctx)) as {
+      items: { label: string; value: number }[];
+    };
 
     expect(result.items).toEqual([{ label: 'A', value: 2 }]);
   });
@@ -156,6 +160,8 @@ describe('nestjsResilienceTelescope extension', () => {
       .find((p) => p.name === 'resilience.recentTransitions');
     const result = (await provider?.resolve({}, ctx)) as { rows: Record<string, unknown>[] };
 
-    expect(result.rows).toEqual([{ event: 'failover', key: null, target: 'vonage', traceId: 'trace-1' }]);
+    expect(result.rows).toEqual([
+      { event: 'failover', key: null, target: 'vonage', traceId: 'trace-1' },
+    ]);
   });
 });

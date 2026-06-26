@@ -14,7 +14,7 @@ suite('PrismaResilienceStore (real Postgres)', () => {
 
   beforeAll(async () => {
     pg = await new PostgreSqlContainer('postgres:16-alpine').start();
-    const mod = (await import('../node_modules/.prisma/resilience-client/index.js') as unknown) as {
+    const mod = (await import('../node_modules/.prisma/resilience-client/index.js')) as unknown as {
       PrismaClient: new (opts: unknown) => PrismaLike & { $disconnect(): Promise<void> };
     };
     prisma = new mod.PrismaClient({ datasources: { db: { url: pg.getConnectionUri() } } });
@@ -36,7 +36,8 @@ suite('PrismaResilienceStore (real Postgres)', () => {
       get(target, p) {
         const orig = (target as unknown as Record<string, unknown>)[p as string];
         if (typeof orig === 'function' && (p === 'admit' || p === 'record' || p === 'snapshot')) {
-          return (key: string, ...rest: unknown[]) => (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
+          return (key: string, ...rest: unknown[]) =>
+            (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
         }
         return orig;
       },

@@ -1,6 +1,11 @@
 import { type Clock, systemClock } from '../clock';
+import {
+  type CircuitState,
+  INITIAL_CIRCUIT_STATE,
+  computeAdmit,
+  computeRecord,
+} from './state-machine';
 import type { ResilienceStore } from './store';
-import { type CircuitState, INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord } from './state-machine';
 import type { Admission, BreakerConfig, CircuitSnapshot, CircuitStatus } from './types';
 
 export class InMemoryResilienceStore implements ResilienceStore {
@@ -22,7 +27,12 @@ export class InMemoryResilienceStore implements ResilienceStore {
     return admission;
   }
 
-  async record(key: string, cfg: BreakerConfig, ok: boolean, probe: boolean): Promise<CircuitStatus> {
+  async record(
+    key: string,
+    cfg: BreakerConfig,
+    ok: boolean,
+    probe: boolean,
+  ): Promise<CircuitStatus> {
     const { state, status } = computeRecord(this.entry(key), cfg, ok, probe, this.clock.now());
     this.map.set(key, state);
     return status;
@@ -30,6 +40,10 @@ export class InMemoryResilienceStore implements ResilienceStore {
 
   async snapshot(key: string): Promise<CircuitSnapshot> {
     const e = this.entry(key);
-    return { status: e.status, failures: e.failures, ...(e.openUntil ? { openUntil: e.openUntil } : {}) };
+    return {
+      status: e.status,
+      failures: e.failures,
+      ...(e.openUntil ? { openUntil: e.openUntil } : {}),
+    };
   }
 }

@@ -43,7 +43,11 @@ export class ResilienceModule {
 
   static forRootAsync(options: ResilienceModuleAsyncOptions): DynamicModule {
     const providers: Provider[] = [
-      { provide: RESILIENCE_OPTIONS, useFactory: options.useFactory, inject: options.inject as never },
+      {
+        provide: RESILIENCE_OPTIONS,
+        useFactory: options.useFactory,
+        inject: options.inject as never,
+      },
       {
         provide: RESILIENCE_STORE,
         useFactory: (opts: ResilienceModuleOptions) => opts.store ?? new InMemoryResilienceStore(),

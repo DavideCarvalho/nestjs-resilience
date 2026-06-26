@@ -7,7 +7,12 @@ import type {
   Clock,
   ResilienceStore,
 } from '@dudousxd/nestjs-resilience';
-import { INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord, systemClock } from '@dudousxd/nestjs-resilience';
+import {
+  INITIAL_CIRCUIT_STATE,
+  computeAdmit,
+  computeRecord,
+  systemClock,
+} from '@dudousxd/nestjs-resilience';
 import { eq } from 'drizzle-orm';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { circuits, type resilienceSchema } from './schema';
@@ -20,20 +25,34 @@ type DB = BetterSQLite3Database<typeof resilienceSchema>;
 
 export class DrizzleResilienceStore implements ResilienceStore {
   private readonly clock: Clock;
-  constructor(private readonly db: DB, opts: DrizzleResilienceStoreOptions = {}) {
+  constructor(
+    private readonly db: DB,
+    opts: DrizzleResilienceStoreOptions = {},
+  ) {
     this.clock = opts.clock ?? systemClock;
   }
 
   private load(key: string): CircuitState {
     const row = this.db.select().from(circuits).where(eq(circuits.key, key)).get();
     if (!row) return { ...INITIAL_CIRCUIT_STATE };
-    return { status: row.status as CircuitStatus, failures: row.failures, openUntil: row.openUntil, probes: row.probes };
+    return {
+      status: row.status as CircuitStatus,
+      failures: row.failures,
+      openUntil: row.openUntil,
+      probes: row.probes,
+    };
   }
 
   private persist(key: string, s: CircuitState): void {
     this.db
       .insert(circuits)
-      .values({ key, status: s.status, failures: s.failures, openUntil: s.openUntil, probes: s.probes })
+      .values({
+        key,
+        status: s.status,
+        failures: s.failures,
+        openUntil: s.openUntil,
+        probes: s.probes,
+      })
       .onConflictDoUpdate({
         target: circuits.key,
         set: { status: s.status, failures: s.failures, openUntil: s.openUntil, probes: s.probes },
@@ -50,7 +69,12 @@ export class DrizzleResilienceStore implements ResilienceStore {
     });
   }
 
-  async record(key: string, cfg: BreakerConfig, ok: boolean, probe: boolean): Promise<CircuitStatus> {
+  async record(
+    key: string,
+    cfg: BreakerConfig,
+    ok: boolean,
+    probe: boolean,
+  ): Promise<CircuitStatus> {
     return this.db.transaction((): CircuitStatus => {
       const { state, status } = computeRecord(this.load(key), cfg, ok, probe, this.clock.now());
       this.persist(key, state);
@@ -60,6 +84,10 @@ export class DrizzleResilienceStore implements ResilienceStore {
 
   async snapshot(key: string): Promise<CircuitSnapshot> {
     const s = this.load(key);
-    return { status: s.status, failures: s.failures, ...(s.openUntil ? { openUntil: s.openUntil } : {}) };
+    return {
+      status: s.status,
+      failures: s.failures,
+      ...(s.openUntil ? { openUntil: s.openUntil } : {}),
+    };
   }
 }

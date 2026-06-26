@@ -8,11 +8,20 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "skills"
+  ],
   "exports": {
     ".": {
-      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "sideEffects": false,
@@ -21,7 +30,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@dudousxd/nestjs-diagnostics": "^0.2.3"
   },
@@ -36,5 +47,14 @@
     "typescript": "^5.9.3",
     "vitest": "^3"
   },
-  "keywords": ["nestjs", "resilience", "circuit-breaker", "telescope", "observability", "watcher", "extension"]
+  "keywords": [
+    "nestjs",
+    "resilience",
+    "circuit-breaker",
+    "telescope",
+    "observability",
+    "watcher",
+    "extension",
+    "tanstack-intent"
+  ]
 }

@@ -6,7 +6,10 @@ import type { BreakerConfig } from './types';
 const cfg: BreakerConfig = { threshold: 3, cooldownMs: 1000 };
 
 /** Shared behavioural contract every ResilienceStore adapter must satisfy. */
-export function runResilienceStoreContract(name: string, makeStore: (clock: Clock) => ResilienceStore): void {
+export function runResilienceStoreContract(
+  name: string,
+  makeStore: (clock: Clock) => ResilienceStore,
+): void {
   describe(`ResilienceStore contract: ${name}`, () => {
     it('opens after threshold and short-circuits', async () => {
       const s = makeStore(new FakeClock());

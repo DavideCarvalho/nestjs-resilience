@@ -8,7 +8,7 @@
     "lint": "biome check .",
     "typecheck": "pnpm -r typecheck",
     "changeset": "changeset",
-    "version": "changeset version",
+    "version": "changeset version && node scripts/sync-version.mjs",
     "release": "pnpm -r build && changeset publish"
   },
   "devDependencies": {

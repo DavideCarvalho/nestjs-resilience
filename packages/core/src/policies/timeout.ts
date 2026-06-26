@@ -19,7 +19,11 @@ export function timeout(ms: number, opts: { clock?: Clock } = {}): Policy {
           reject(ac.signal.reason ?? new TimeoutError(ms));
           return;
         }
-        ac.signal.addEventListener('abort', () => reject(ac.signal.reason ?? new TimeoutError(ms)), { once: true });
+        ac.signal.addEventListener(
+          'abort',
+          () => reject(ac.signal.reason ?? new TimeoutError(ms)),
+          { once: true },
+        );
       });
 
       return Promise.race([op(ctx), aborted]).finally(() => {

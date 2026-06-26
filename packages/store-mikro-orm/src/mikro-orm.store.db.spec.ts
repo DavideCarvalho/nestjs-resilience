@@ -37,7 +37,8 @@ suite('MikroOrmResilienceStore (real Postgres)', () => {
       get(target, p) {
         const orig = (target as unknown as Record<string, unknown>)[p as string];
         if (typeof orig === 'function' && (p === 'admit' || p === 'record' || p === 'snapshot')) {
-          return (key: string, ...rest: unknown[]) => (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
+          return (key: string, ...rest: unknown[]) =>
+            (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
         }
         return orig;
       },

@@ -56,7 +56,12 @@ export class RedisResilienceStore implements ResilienceStore {
     return { allow: allow === 1, probe: probe === 1, status: status as CircuitStatus };
   }
 
-  async record(key: string, cfg: BreakerConfig, ok: boolean, probe: boolean): Promise<CircuitStatus> {
+  async record(
+    key: string,
+    cfg: BreakerConfig,
+    ok: boolean,
+    probe: boolean,
+  ): Promise<CircuitStatus> {
     const status = await this.redis.cbRecord(
       this.k(key),
       ok ? 1 : 0,

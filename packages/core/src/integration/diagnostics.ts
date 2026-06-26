@@ -9,7 +9,10 @@ function resolveEmit(): EmitFn | null {
   if (cached !== undefined) return cached;
   try {
     // Indirected require so bundlers don't hard-fail when the optional peer is missing.
-    const mod = (eval('require') as NodeRequire)('@dudousxd/nestjs-diagnostics') as { emit: EmitFn };
+    // biome-ignore lint/security/noGlobalEval: intentional indirect require — only the literal 'require' is evaluated, to keep the optional peer dep bundler-safe.
+    const mod = (eval('require') as NodeRequire)('@dudousxd/nestjs-diagnostics') as {
+      emit: EmitFn;
+    };
     cached = typeof mod.emit === 'function' ? mod.emit : null;
   } catch {
     cached = null;

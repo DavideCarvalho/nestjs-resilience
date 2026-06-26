@@ -1,0 +1,107 @@
+# Domain map for nestjs-resilience (autonomous pass; maintainer interview SKIPPED)
+# Grounded in repo source under packages/*/src and docs/.
+library: "@dudousxd/nestjs-resilience"
+repo: DavideCarvalho/nestjs-resilience
+one_liner: >
+  NestJS-native resilience toolkit — composable timeout / retry / circuit-breaker / failover
+  policies with a pluggable, distributed circuit-breaker store, wired into the Aviary ecosystem
+  (diagnostics, context, event-emitter).
+
+monorepo: true
+packages:
+  - name: "@dudousxd/nestjs-resilience"
+    dir: packages/core
+    role: primary
+    client_facing: true
+    summary: Policy engine + ResilienceStore contract + in-memory/SQL stores + NestJS surfaces (module/service/decorators).
+  - name: "@dudousxd/nestjs-resilience-store-redis"
+    dir: packages/store-redis
+    role: primary-adapter
+    client_facing: true
+    summary: Distributed ResilienceStore on Redis via atomic Lua (cbAdmit / cbRecord).
+  - name: "@dudousxd/nestjs-resilience-telescope"
+    dir: packages/telescope
+    role: primary-observability
+    client_facing: true
+    summary: nestjs-telescope extension recording aviary:resilience:* diagnostics events as a Resilience dashboard.
+  - name: "@dudousxd/nestjs-resilience-store-typeorm"
+    dir: packages/store-typeorm
+    client_facing: true
+    role: secondary-adapter
+    covered: false
+  - name: "@dudousxd/nestjs-resilience-store-mikro-orm"
+    dir: packages/store-mikro-orm
+    client_facing: true
+    role: secondary-adapter
+    covered: false
+  - name: "@dudousxd/nestjs-resilience-store-prisma"
+    dir: packages/store-prisma
+    client_facing: true
+    role: secondary-adapter
+    covered: false
+  - name: "@dudousxd/nestjs-resilience-store-drizzle"
+    dir: packages/store-drizzle
+    client_facing: true
+    role: secondary-adapter
+    covered: false
+
+# The core public API surface (from packages/core/src/index.ts).
+core_api:
+  policies:
+    - "timeout(ms, { clock? }) -> Policy"
+    - "retry({ attempts, backoff?, clock? }) -> Policy   # attempts = TOTAL tries"
+    - "exponential(baseMs, { jitter?, factor? }) -> Backoff   # baseMs is REQUIRED"
+    - "circuitBreaker({ key, store, threshold, cooldownMs, halfOpenMax?, onEvent? }) -> Policy"
+    - "wrap(...policies) -> Policy   # composes OUTER -> INNER (reduceRight)"
+    - "failover({ targets, run, policy?, onFailover?, onEvent? }) -> Promise<R>   # standalone async fn, not a Policy"
+  contracts:
+    - "interface Policy { execute<T>(op, parent?): Promise<T> }"
+    - "interface PolicyContext { signal: AbortSignal; attempt: number }"
+    - "rootContext(): PolicyContext"
+  errors:
+    - "TimeoutError(ms)"
+    - "BrokenCircuitError(key)"
+  store:
+    - "interface ResilienceStore { admit(key,cfg); record(key,cfg,ok,probe); snapshot(key) }"
+    - "InMemoryResilienceStore(clock?)   # single-process only"
+    - "SqlResilienceStore(opts)  + CIRCUITS_DDL  (types: SqlDriver, SqlTx, SqlPlaceholderStyle, SqlResilienceStoreOptions)"
+    - "types: Admission, BreakerConfig, CircuitSnapshot, CircuitStatus ('closed'|'open'|'half-open')"
+    - "state machine: INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord, CircuitState"
+    - "contract test: runResilienceStoreContract  (from '@dudousxd/nestjs-resilience/testing')"
+  nest:
+    - "ResilienceModule.forRoot(options?) / forRootAsync({ useFactory, inject?, global? })  # global defaults TRUE"
+    - "ResilienceModuleOptions { store?, policies?, global?, emit?, eventEmitter? }"
+    - "ResilienceService { execute(policy|name, op); failover(opts); circuit(key).{snapshot,reset}; sink }"
+    - "decorators: @Timeout(ms), @Retry({ attempts, backoff? }), @CircuitBreaker({ threshold, cooldownMs, key?, halfOpenMax? })"
+    - "tokens: RESILIENCE_STORE, RESILIENCE_OPTIONS"
+    - "ResilienceExplorer wraps decorated methods at OnModuleInit via DiscoveryService"
+  events:
+    - "ResilienceEventType: circuit-opened|circuit-closed|circuit-half-open|short-circuited|failover|timeout|retry"
+    - "EventSink, combineSinks, noopSink"
+    - "diagnosticsSink() -> emits emit('resilience', type, event) -> channel aviary:resilience:<type>"
+    - "eventEmitterSink(emitter): resilienceEventName('circuit-opened') === 'resilience.circuit.opened'"
+    - "tenantSuffix() reads @dudousxd/nestjs-context tenantId if registered"
+
+ground_truths:
+  - "wrap() composes outer->inner: wrap(timeout, retry, circuitBreaker) runs timeout OUTERMOST, circuitBreaker INNERMOST (reduceRight in policies/wrap.ts)."
+  - "retry() loops `for attempt < opts.attempts` -> attempts:3 means 3 TOTAL executions (2 retries), not 3 retries."
+  - "exponential() REQUIRES a baseMs argument; calling exponential() with no arg yields NaN backoff. (README's example omits it.)"
+  - "timeout() cancels via AbortSignal passed in ctx.signal; the operation only truly stops if it observes ctx.signal — otherwise the promise rejects but work continues."
+  - "circuitBreaker needs a `store`; InMemoryResilienceStore is PER-PROCESS so multi-instance fleets need a distributed store (Redis/SQL)."
+  - "@CircuitBreaker without `key` defaults the breaker key to `ClassName.methodName` (explorer defaultKey)."
+  - "ResilienceModule is global by default (global: options.global ?? true)."
+  - "ResilienceService.execute('name', op) requires that name registered in forRoot({ policies }) else throws `Unknown resilience policy`."
+  - "diagnostics emit is an OPTIONAL soft dependency: emit defaults true but no-ops when @dudousxd/nestjs-diagnostics is absent; set emit:false to disable."
+  - "halfOpenMax default is 1 -> exactly one probe in half-open; the store enforces this atomically."
+  - "failover() is a standalone async function (returns Promise<R>), NOT a Policy; ResilienceService.failover wires the diagnostics sink in."
+  - "RedisResilienceStore registers cbAdmit/cbRecord via defineCommand (idempotent), default keyPrefix 'resilience:cb:'."
+  - "Telescope watcher only subscribes to aviary:resilience:* channels; it needs resilience emit enabled and diagnostics present to show data."
+
+gaps:
+  # What a maintainer interview (skipped — autonomous) would have answered.
+  - "Priority/ranking of skills not maintainer-confirmed; inferred core > redis > telescope from README + package roles."
+  - "AI-agent-specific failure modes (beyond source-evident ones) unknown — no GitHub issues exist yet for this repo."
+  - "Production defaults guidance (recommended threshold/cooldownMs/halfOpenMax per workload) not documented; left to consumer."
+  - "Whether 'timeout'/'retry' ResilienceEventType values are ever emitted at runtime: defined in events.ts but no emit site found in the standalone timeout()/retry() policies — only circuit-breaker and failover emit. Not claimed as emitted in skills."
+  - "Recommended store per scale (Redis vs SQL-via-ORM) not maintainer-ranked; the 4 ORM store adapters (typeorm/mikro-orm/prisma/drizzle) are left UNCOVERED by skills (listed under packagesCovered exclusions)."
+  - "Interaction/precedence when both decorators and programmatic policies target the same provider not documented."

@@ -7,13 +7,17 @@ describe('eventEmitterSink', () => {
     const emit = vi.fn();
     const sink = eventEmitterSink({ emit });
     sink({ type: 'circuit-opened', key: 'sms:twilio', failures: 3 });
-    expect(emit).toHaveBeenCalledWith('resilience.circuit.opened', { type: 'circuit-opened', key: 'sms:twilio', failures: 3 });
+    expect(emit).toHaveBeenCalledWith('resilience.circuit.opened', {
+      type: 'circuit-opened',
+      key: 'sms:twilio',
+      failures: 3,
+    });
   });
 
   it('maps every event type', () => {
     expect(resilienceEventName('circuit-half-open')).toBe('resilience.circuit.half.open');
     expect(resilienceEventName('short-circuited')).toBe('resilience.short.circuited');
-    expect(resilienceEventName('retry')).toBe('resilience.retry');
+    expect(resilienceEventName('failover')).toBe('resilience.failover');
   });
 });
 
@@ -22,7 +26,7 @@ describe('combineSinks', () => {
     const a = vi.fn();
     const b = vi.fn();
     const sink = combineSinks(a, b);
-    const ev = { type: 'timeout', key: 'k', ms: 100 } as const;
+    const ev = { type: 'short-circuited', key: 'k', ms: 100 } as const;
     sink(ev);
     expect(a).toHaveBeenCalledWith(ev);
     expect(b).toHaveBeenCalledWith(ev);
@@ -34,7 +38,7 @@ describe('combineSinks', () => {
     });
     const good = vi.fn();
     const sink = combineSinks(bad, good);
-    expect(() => sink({ type: 'retry', key: 'k' })).not.toThrow();
+    expect(() => sink({ type: 'failover', key: 'k' })).not.toThrow();
     expect(good).toHaveBeenCalledTimes(1);
   });
 });

@@ -24,7 +24,8 @@
   },
   "files": [
     "dist",
-    "LICENSE"
+    "LICENSE",
+    "skills"
   ],
   "scripts": {
     "build": "tsup",
@@ -56,5 +57,8 @@
     "tsup": "^8",
     "typescript": "^5.6",
     "vitest": "^3"
-  }
+  },
+  "keywords": [
+    "tanstack-intent"
+  ]
 }

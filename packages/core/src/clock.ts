@@ -33,7 +33,11 @@ export class SystemClock implements Clock {
 
 export const systemClock: Clock = new SystemClock();
 
-interface FakeTimer { at: number; cb: () => void; id: number }
+interface FakeTimer {
+  at: number;
+  cb: () => void;
+  id: number;
+}
 
 export class FakeClock implements Clock {
   private t = 0;

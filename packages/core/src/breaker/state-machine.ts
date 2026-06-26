@@ -33,17 +33,29 @@ export function computeAdmit(
     probes = 0;
   }
   if (status === 'closed') {
-    return { state: { status, failures, openUntil, probes }, admission: { allow: true, probe: false, status: 'closed' } };
+    return {
+      state: { status, failures, openUntil, probes },
+      admission: { allow: true, probe: false, status: 'closed' },
+    };
   }
   if (status === 'open') {
-    return { state: { status, failures, openUntil, probes }, admission: { allow: false, probe: false, status: 'open' } };
+    return {
+      state: { status, failures, openUntil, probes },
+      admission: { allow: false, probe: false, status: 'open' },
+    };
   }
   const max = cfg.halfOpenMax ?? 1;
   if (probes < max) {
     probes += 1;
-    return { state: { status, failures, openUntil, probes }, admission: { allow: true, probe: true, status: 'half-open' } };
+    return {
+      state: { status, failures, openUntil, probes },
+      admission: { allow: true, probe: true, status: 'half-open' },
+    };
   }
-  return { state: { status, failures, openUntil, probes }, admission: { allow: false, probe: false, status: 'half-open' } };
+  return {
+    state: { status, failures, openUntil, probes },
+    admission: { allow: false, probe: false, status: 'half-open' },
+  };
 }
 
 /**

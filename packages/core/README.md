@@ -257,8 +257,6 @@ When `emit: true` (the default) and `@dudousxd/nestjs-diagnostics` is installed,
 | `circuit-half-open` | A probe call is allowed through during cooldown | `aviary:resilience:circuit-half-open` |
 | `short-circuited` | A call is rejected because the circuit is open | `aviary:resilience:short-circuited` |
 | `failover` | A target fails and the next target is attempted | `aviary:resilience:failover` |
-| `timeout` | An operation exceeds its time limit | `aviary:resilience:timeout` |
-| `retry` | An attempt fails and a retry is scheduled | `aviary:resilience:retry` |
 
 Each event payload conforms to `ResilienceEvent` (`{ type: ResilienceEventType; key?: string; [extra: string]: unknown }`), exported from the package.
 

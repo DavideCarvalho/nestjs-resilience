@@ -23,7 +23,8 @@ export function circuitBreaker(opts: CircuitBreakerOptions): Policy {
   return {
     async execute<T>(op: Operation<T>, parent: PolicyContext = rootContext()): Promise<T> {
       const admission = await opts.store.admit(opts.key, cfg);
-      if (admission.status === 'half-open' && admission.probe) onEvent({ type: 'circuit-half-open', key: opts.key });
+      if (admission.status === 'half-open' && admission.probe)
+        onEvent({ type: 'circuit-half-open', key: opts.key });
       if (!admission.allow) {
         onEvent({ type: 'short-circuited', key: opts.key });
         throw new BrokenCircuitError(opts.key);
@@ -31,7 +32,8 @@ export function circuitBreaker(opts: CircuitBreakerOptions): Policy {
       try {
         const result = await op({ signal: parent.signal, attempt: parent.attempt });
         const status = await opts.store.record(opts.key, cfg, true, admission.probe);
-        if (status === 'closed' && admission.probe) onEvent({ type: 'circuit-closed', key: opts.key });
+        if (status === 'closed' && admission.probe)
+          onEvent({ type: 'circuit-closed', key: opts.key });
         return result;
       } catch (err) {
         const status = await opts.store.record(opts.key, cfg, false, admission.probe);

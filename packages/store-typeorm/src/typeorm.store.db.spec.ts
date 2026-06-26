@@ -1,7 +1,7 @@
 import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience/testing';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { afterAll, beforeAll, describe } from 'vitest';
 import { DataSource } from 'typeorm';
+import { afterAll, beforeAll, describe } from 'vitest';
 import { TypeOrmResilienceStore } from './typeorm.store';
 
 const skip = !!process.env.SKIP_TESTCONTAINERS;
@@ -34,7 +34,8 @@ suite('TypeOrmResilienceStore (real Postgres)', () => {
       get(target, p) {
         const orig = (target as unknown as Record<string, unknown>)[p as string];
         if (typeof orig === 'function' && (p === 'admit' || p === 'record' || p === 'snapshot')) {
-          return (key: string, ...rest: unknown[]) => (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
+          return (key: string, ...rest: unknown[]) =>
+            (orig as (...a: unknown[]) => unknown).call(target, prefix + key, ...rest);
         }
         return orig;
       },

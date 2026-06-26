@@ -13,7 +13,9 @@ describe('wrap', () => {
       calls++;
       if (calls < 2) {
         // first call hangs until aborted by the timeout
-        await new Promise<never>((_, reject) => ctx.signal.addEventListener('abort', () => reject(ctx.signal.reason)));
+        await new Promise<never>((_, reject) =>
+          ctx.signal.addEventListener('abort', () => reject(ctx.signal.reason)),
+        );
       }
       return 'ok';
     });

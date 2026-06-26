@@ -1,8 +1,12 @@
+import diagnostics_channel from 'node:diagnostics_channel';
 import { emit, resetRegistry, setContextAccessor } from '@dudousxd/nestjs-diagnostics';
 import { collectWatcherEntries } from '@dudousxd/nestjs-telescope-testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { type ResilienceEntryContent, ResilienceWatcher, isResilienceEvent } from './resilience.watcher';
-import diagnostics_channel from 'node:diagnostics_channel';
+import {
+  type ResilienceEntryContent,
+  ResilienceWatcher,
+  isResilienceEvent,
+} from './resilience.watcher';
 
 describe('ResilienceWatcher', () => {
   let cleanup: (() => void) | undefined;
@@ -134,7 +138,9 @@ describe('ResilienceWatcher', () => {
 
 describe('isResilienceEvent', () => {
   it('accepts a well-formed resilience envelope', () => {
-    expect(isResilienceEvent({ ts: 1, lib: 'resilience', event: 'circuit-opened', payload: {} })).toBe(true);
+    expect(
+      isResilienceEvent({ ts: 1, lib: 'resilience', event: 'circuit-opened', payload: {} }),
+    ).toBe(true);
   });
 
   it('rejects malformed or non-resilience envelopes', () => {

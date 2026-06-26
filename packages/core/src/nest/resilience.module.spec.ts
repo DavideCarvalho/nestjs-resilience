@@ -21,13 +21,17 @@ describe('ResilienceModule', () => {
   });
 
   it('runs an inline policy and a raw op', async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [ResilienceModule.forRoot()] }).compile();
+    const moduleRef = await Test.createTestingModule({
+      imports: [ResilienceModule.forRoot()],
+    }).compile();
     const svc = moduleRef.get(ResilienceService);
     await expect(svc.execute(wrap(timeout(1000)), async () => 42)).resolves.toBe(42);
   });
 
   it('exposes circuit snapshot/reset', async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [ResilienceModule.forRoot()] }).compile();
+    const moduleRef = await Test.createTestingModule({
+      imports: [ResilienceModule.forRoot()],
+    }).compile();
     const svc = moduleRef.get(ResilienceService);
     const snap = await svc.circuit('k').snapshot();
     expect(snap.status).toBe('closed');
@@ -35,7 +39,9 @@ describe('ResilienceModule', () => {
   });
 
   it('reset() closes an open circuit and clears failures', async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [ResilienceModule.forRoot()] }).compile();
+    const moduleRef = await Test.createTestingModule({
+      imports: [ResilienceModule.forRoot()],
+    }).compile();
     const svc = moduleRef.get(ResilienceService);
     const store = moduleRef.get<ResilienceStore>(RESILIENCE_STORE);
     await store.record('x', { threshold: 1, cooldownMs: 60_000 }, false, false);
@@ -60,12 +66,22 @@ describe('ResilienceModule', () => {
 
   it('mirrors events to a provided EventEmitter2-style emitter', async () => {
     const events: Array<{ name: string; payload: unknown }> = [];
-    const emitter = { emit: (name: string, payload: unknown) => { events.push({ name, payload }); return true; } };
+    const emitter = {
+      emit: (name: string, payload: unknown) => {
+        events.push({ name, payload });
+        return true;
+      },
+    };
     const moduleRef = await Test.createTestingModule({
       imports: [ResilienceModule.forRoot({ emit: false, eventEmitter: emitter })],
     }).compile();
     const svc = moduleRef.get(ResilienceService);
     svc.sink({ type: 'circuit-opened', key: 'k', failures: 3 });
-    expect(events).toEqual([{ name: 'resilience.circuit.opened', payload: { type: 'circuit-opened', key: 'k', failures: 3 } }]);
+    expect(events).toEqual([
+      {
+        name: 'resilience.circuit.opened',
+        payload: { type: 'circuit-opened', key: 'k', failures: 3 },
+      },
+    ]);
   });
 });

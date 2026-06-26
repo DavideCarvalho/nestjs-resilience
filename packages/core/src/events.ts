@@ -3,9 +3,7 @@ export type ResilienceEventType =
   | 'circuit-closed'
   | 'circuit-half-open'
   | 'short-circuited'
-  | 'failover'
-  | 'timeout'
-  | 'retry';
+  | 'failover';
 
 export interface ResilienceEvent {
   type: ResilienceEventType;

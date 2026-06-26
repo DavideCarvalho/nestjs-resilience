@@ -42,7 +42,10 @@ describe('timeout', () => {
     const parentAc = new AbortController();
     const p = timeout(1000, { clock });
     const result = p.execute(
-      (ctx) => new Promise<never>((_, reject) => ctx.signal.addEventListener('abort', () => reject(ctx.signal.reason))),
+      (ctx) =>
+        new Promise<never>((_, reject) =>
+          ctx.signal.addEventListener('abort', () => reject(ctx.signal.reason)),
+        ),
       { signal: parentAc.signal, attempt: 0 },
     );
     parentAc.abort(new Error('parent gone'));
