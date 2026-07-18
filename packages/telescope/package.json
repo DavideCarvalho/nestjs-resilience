@@ -1,7 +1,7 @@
 {
   "name": "@dudousxd/nestjs-resilience-telescope",
   "version": "0.2.0",
-  "description": "nestjs-telescope extension for @dudousxd/nestjs-resilience — records circuit-breaker / failover / timeout / retry events in the Telescope dashboard.",
+  "description": "nestjs-telescope extension for @dudousxd/nestjs-resilience — records circuit-breaker / failover events in the Telescope dashboard.",
   "license": "MIT",
   "author": "Davide Carvalho",
   "type": "module",
