@@ -10,12 +10,15 @@ Resilience plugs into the rest of the ecosystem through **event sinks** and a **
 
 ## Events
 
-Every state transition is a `ResilienceEvent` handed to an `EventSink`:
+Every state transition is a `ResilienceEvent` handed to an `EventSink`. Five transitions are emitted today — one per breaker/failover state change:
 
 ```ts
 type ResilienceEventType =
-  | 'circuit-opened' | 'circuit-closed' | 'circuit-half-open'
-  | 'short-circuited' | 'failover' | 'timeout' | 'retry';
+  | 'circuit-opened'    // breaker tripped: failures crossed the threshold
+  | 'circuit-closed'    // a half-open probe succeeded; traffic restored
+  | 'circuit-half-open' // cooldown elapsed; this call is the trial probe
+  | 'short-circuited'   // call rejected while the breaker is open
+  | 'failover';         // a failover policy moved to the next target
 
 interface ResilienceEvent {
   type: ResilienceEventType;
@@ -25,6 +28,10 @@ interface ResilienceEvent {
 
 type EventSink = (event: ResilienceEvent) => void;
 ```
+
+<Callout type="warn">
+Those five are the whole event surface. The `timeout` and `retry` policies don't emit events — they're **not** in `ResilienceEventType`, and there's no `aviary:resilience:timeout` or `aviary:resilience:retry` channel to subscribe to. Observe timeout/retry behaviour through their thrown errors (`TimeoutError`) and return values instead, not through the event stream.
+</Callout>
 
 Pass `onEvent` to any policy, or let the module wire the sinks for you. Combine several with `combineSinks`:
 
@@ -52,7 +59,7 @@ The module wires this automatically; you only call `diagnosticsSink()` by hand w
 
 ### Telescope dashboard
 
-For a first-class view in [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) — instead of generic diagnostic blobs — add [`@dudousxd/nestjs-resilience-telescope`](https://github.com/DavideCarvalho/nestjs-resilience/tree/master/packages/telescope). It records every transition as a `resilience` entry and contributes a **Resilience** dashboard (open circuits, recent failovers, most-tripped circuits, and a table of recent transitions):
+For a first-class view in [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) — instead of generic diagnostic blobs — add [`@dudousxd/nestjs-resilience-telescope`](/docs/telescope). It records every transition as a `resilience` entry and contributes a **Resilience** dashboard (open circuits, recent failovers, most-tripped circuits, and a table of recent transitions):
 
 ```ts
 import { TelescopeModule } from '@dudousxd/nestjs-telescope';
@@ -61,7 +68,7 @@ import { nestjsResilienceTelescope } from '@dudousxd/nestjs-resilience-telescope
 TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] });
 ```
 
-It subscribes to the `aviary:resilience:*` channels, so it needs nothing beyond the default `emit: true` — and costs nothing until resilience emits.
+It subscribes to the `aviary:resilience:*` channels, so it needs nothing beyond the default `emit: true` — and costs nothing until resilience emits. See the [Telescope dashboard](/docs/telescope) page for panels, options, and the exported building blocks.
 
 ## Reacting in-app
 
@@ -83,7 +90,7 @@ export class CircuitReactions implements OnModuleInit {
 }
 ```
 
-There's one channel per [`ResilienceEventType`](#events) under `aviary:resilience:<type>` — subscribe to each you care about (`circuit-opened`, `short-circuited`, `failover`, …).
+There's one channel per emitted [`ResilienceEventType`](#events) under `aviary:resilience:<type>` — subscribe to each you care about: `circuit-opened`, `circuit-closed`, `circuit-half-open`, `short-circuited`, and `failover`.
 
 <Callout type="info">
 Prefer raw `onEvent` sinks over the diagnostics channel? Pass any `EventSink` (or `combineSinks(...)`) to a policy — see [Events](#events) above. Either way you stay on one event stream that observability tools read too.

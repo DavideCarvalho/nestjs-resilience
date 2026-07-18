@@ -1,0 +1,98 @@
+---
+title: Telescope dashboard
+description: Add @dudousxd/nestjs-resilience-telescope for a first-class Resilience dashboard in Telescope — open circuits, recent failovers, most-tripped keys, and a live table of transitions — recorded straight off the diagnostics channels.
+icon: Telescope
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+[`diagnosticsSink()`](/docs/integrations#diagnostics) already pushes every transition onto the `aviary:resilience:*` channels. **[`@dudousxd/nestjs-resilience-telescope`](https://github.com/DavideCarvalho/nestjs-resilience/tree/master/packages/telescope)** turns that stream into a purpose-built **Resilience** dashboard in [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) — instead of the generic diagnostic blobs you'd get otherwise.
+
+It's a [Telescope extension](https://github.com/DavideCarvalho/nestjs-telescope): a watcher that records one `resilience` entry per transition, plus a dashboard that summarises them. It needs nothing beyond the default `emit: true`, and costs nothing until resilience actually emits.
+
+## Install
+
+<Steps>
+<Step>
+
+Add the extension package alongside Telescope:
+
+```bash
+pnpm add @dudousxd/nestjs-resilience-telescope
+```
+
+</Step>
+<Step>
+
+Register the extension on `TelescopeModule`:
+
+```ts title="app.module.ts"
+import { TelescopeModule } from '@dudousxd/nestjs-telescope';
+import { nestjsResilienceTelescope } from '@dudousxd/nestjs-resilience-telescope';
+
+@Module({
+  imports: [
+    TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] }),
+    ResilienceModule.forRoot({ emit: true }), // default — nothing extra to configure
+  ],
+})
+export class AppModule {}
+```
+
+</Step>
+</Steps>
+
+That's it. The extension subscribes to every `aviary:resilience:*` channel — current and future — so any breaker or failover you already run starts showing up.
+
+## What you get
+
+A **Resilience** dashboard (under the *Observability* nav group) with four panels:
+
+| Panel | Kind | Shows |
+| --- | --- | --- |
+| Open circuits | stat | Circuits whose latest transition left them `circuit-opened` or `circuit-half-open`. |
+| Failovers (recent) | stat | Count of recent `failover` transitions. |
+| Most-tripped circuits | topN | The keys with the most `circuit-opened` events. |
+| Recent transitions | table | Newest transitions with `event`, `key`, `target`, and `traceId` columns. |
+
+Transitions worth attention — `circuit-opened` and `short-circuited` — are tagged `failed`, so they stand out in the entry list and are filterable across Telescope.
+
+## Options
+
+`nestjsResilienceTelescope(options?)` accepts `ResilienceTelescopeOptions`:
+
+```ts
+interface ResilienceTelescopeOptions {
+  /** How many keys to surface in the "most-tripped" panel. Default 10. */
+  topKeysLimit?: number;
+  /** How many rows to list in the "recent transitions" table. Default 50. */
+  recentLimit?: number;
+}
+
+nestjsResilienceTelescope({ topKeysLimit: 20, recentLimit: 100 });
+```
+
+## Under the hood
+
+The package also exports its building blocks, so you can reuse the recording logic outside the bundled dashboard — a custom watcher, a test, or your own extension:
+
+| Export | What it is |
+| --- | --- |
+| `ResilienceWatcher` | The `Watcher` that subscribes to `aviary:resilience:*` and records a `resilience` entry per publish. |
+| `buildResilienceEntry(msg)` | Pure mapper from a diagnostics envelope to a Telescope `RecordInput<ResilienceEntryContent>` (extracts `key` / `target` / `index` / `error`, builds tags). |
+| `isResilienceEvent(msg)` | Type guard for a resilience diagnostics envelope (`lib === 'resilience'`). |
+| `RESILIENCE_ENTRY_TYPE` | The entry `type` string, `'resilience'`. |
+| `ResilienceEntryContent` | The shape of a recorded entry's `content` (`event`, `key`, `target`, `index`, `error`, `traceId`, `ts`, `payload`). |
+
+```ts
+import { buildResilienceEntry, isResilienceEvent } from '@dudousxd/nestjs-resilience-telescope';
+
+if (isResilienceEvent(msg)) {
+  const entry = buildResilienceEntry(msg); // { type: 'resilience', familyHash, tags, content }
+}
+```
+
+<Callout type="info">
+Prefer to react in code rather than watch a dashboard? Subscribe to the diagnostics channel directly — see [Reacting in-app](/docs/integrations#reacting-in-app). Both read the same event stream; Telescope just gives you the visual side.
+</Callout>

@@ -181,3 +181,133 @@ ResilienceModule.forRootAsync({
 <Callout type="info">
 All adapters share one type, `BreakerConfig` (`threshold`, `cooldownMs`, `halfOpenMax?`) — the same options you pass to `circuitBreaker`. Bring your own engine by implementing the three methods and validating it against the [contract suite](/docs/testing#validating-a-store).
 </Callout>
+
+## Building a custom store
+
+Your engine isn't in the table above? A store is just the three `admit` / `record` / `snapshot` methods, and the core package gives you everything to implement them **without re-deriving the breaker's state machine**. There are two paths depending on whether your engine speaks SQL.
+
+### Path A — reuse the SQL base (any relational engine)
+
+Every relational adapter (`store-typeorm`, `store-prisma`, `store-mikro-orm`) is a *few lines* on top of the exported **`SqlResilienceStore`**. It owns the atomic `load → compute → persist` cycle, the dialect-aware statements, and the `resilience_circuits` DDL — so all you supply is a tiny **`SqlDriver`**: your placeholder dialect plus how to run a transaction, a plain read, and a DDL statement.
+
+```ts
+export type SqlPlaceholderStyle = 'numbered' | 'positional'; // `$1,$2…` (Postgres) vs `?`
+
+/** A parameterized statement runner scoped to one transaction. */
+interface SqlTx {
+  run(sql: string, params: unknown[]): Promise<void>;   // INSERT/UPDATE, result discarded
+  all(sql: string, params: unknown[]): Promise<unknown[]>; // SELECT, returns rows
+}
+
+/** The whole per-engine contract. Everything else lives in SqlResilienceStore. */
+interface SqlDriver {
+  readonly placeholders: SqlPlaceholderStyle;
+  transaction<R>(body: (tx: SqlTx) => Promise<R>): Promise<R>; // MUST allow `SELECT … FOR UPDATE`
+  read(sql: string, params: unknown[]): Promise<unknown[]>;    // non-transactional, for snapshot()
+  exec(sql: string): Promise<void>;                            // run a DDL statement
+}
+
+interface SqlResilienceStoreOptions {
+  clock?: Clock; // inject a FakeClock in tests; defaults to systemClock
+}
+```
+
+Here's the entire TypeORM adapter — your own engine follows the same shape, only the four driver methods change:
+
+```ts title="my-engine.store.ts"
+import { SqlResilienceStore, type SqlDriver, type SqlResilienceStoreOptions } from '@dudousxd/nestjs-resilience';
+import type { DataSource } from 'typeorm';
+
+export class TypeOrmResilienceStore extends SqlResilienceStore {
+  constructor(ds: DataSource, opts: SqlResilienceStoreOptions = {}) {
+    super(typeOrmDriver(ds), opts);
+  }
+}
+
+function typeOrmDriver(ds: DataSource): SqlDriver {
+  return {
+    placeholders: 'numbered', // Postgres → $1, $2, …
+    transaction: (body) =>
+      ds.transaction((em) =>
+        body({
+          run: async (sql, params) => { await em.query(sql, params); },
+          all: (sql, params) => em.query(sql, params) as Promise<unknown[]>,
+        }),
+      ),
+    read: (sql, params) => ds.query(sql, params) as Promise<unknown[]>,
+    exec: async (sql) => { await ds.query(sql); },
+  };
+}
+```
+
+<Callout type="warn">
+Atomicity lives in **your `transaction`**. `SqlResilienceStore` issues a `SELECT … FOR UPDATE` inside the callback and relies on it holding a row lock for the duration of the transaction — that's what hands the half-open probe to exactly one instance. If your engine can't lock the row (or serialize the transaction), the store is not safe under concurrency.
+</Callout>
+
+The DDL is exposed as **`CIRCUITS_DDL`** (a plain, dialect-agnostic `CREATE TABLE IF NOT EXISTS` string) and applied by `ensureSchema()`. Call it once on boot, or feed `CIRCUITS_DDL` to your migration tool instead:
+
+```ts
+import { CIRCUITS_DDL, SqlResilienceStore } from '@dudousxd/nestjs-resilience';
+
+const store = new SqlResilienceStore(myDriver);
+await store.ensureSchema();      // runs CIRCUITS_DDL — safe to call on every startup
+// …or in a migration: await queryRunner.query(CIRCUITS_DDL);
+```
+
+### Path B — implement `ResilienceStore` directly (non-SQL engines)
+
+For a key/value or document engine, implement the interface yourself — but **don't reinvent the breaker logic**. The core package exports the state machine as three pure, serializable primitives, so your store only handles *storage* and *atomicity*:
+
+| Export | What it is |
+| --- | --- |
+| `CircuitState` | The plain, serializable unit every store persists: `{ status, failures, openUntil, probes }`. |
+| `INITIAL_CIRCUIT_STATE` | Fresh-circuit defaults (a brand-new key behaves as a closed circuit). |
+| `computeAdmit(prev, cfg, now)` | Pure "may I run?" decision → `{ state, admission }`. No I/O. |
+| `computeRecord(prev, cfg, ok, probe, now)` | Pure "record this outcome" → `{ state, status }`. No I/O. |
+
+The pattern is always **load → compute → persist**, wrapped in whatever atomicity your engine provides. This is exactly how the synchronous Drizzle/SQLite adapter works:
+
+```ts title="my-kv.store.ts"
+import {
+  INITIAL_CIRCUIT_STATE, computeAdmit, computeRecord, systemClock,
+  type Admission, type BreakerConfig, type CircuitSnapshot, type CircuitState,
+  type CircuitStatus, type Clock, type ResilienceStore,
+} from '@dudousxd/nestjs-resilience';
+
+export class MyKvResilienceStore implements ResilienceStore {
+  private readonly clock: Clock;
+  constructor(private readonly engine: MyEngine, opts: { clock?: Clock } = {}) {
+    this.clock = opts.clock ?? systemClock;
+  }
+
+  private load(key: string): CircuitState {
+    const row = this.engine.get(key);
+    return row ? (JSON.parse(row) as CircuitState) : { ...INITIAL_CIRCUIT_STATE };
+  }
+
+  async admit(key: string, cfg: BreakerConfig): Promise<Admission> {
+    return this.engine.transaction(() => {            // ← your atomic section
+      const { state, admission } = computeAdmit(this.load(key), cfg, this.clock.now());
+      this.engine.set(key, JSON.stringify(state));
+      return admission;
+    });
+  }
+
+  async record(key: string, cfg: BreakerConfig, ok: boolean, probe: boolean): Promise<CircuitStatus> {
+    return this.engine.transaction(() => {
+      const { state, status } = computeRecord(this.load(key), cfg, ok, probe, this.clock.now());
+      this.engine.set(key, JSON.stringify(state));
+      return status;
+    });
+  }
+
+  async snapshot(key: string): Promise<CircuitSnapshot> {
+    const s = this.load(key);
+    return { status: s.status, failures: s.failures, ...(s.openUntil ? { openUntil: s.openUntil } : {}) };
+  }
+}
+```
+
+<Callout type="info">
+Threading a `Clock` through (defaulting to `systemClock`) lets a `FakeClock` drive cooldowns instantly in tests. Whichever path you take, prove it against the shared [contract suite](/docs/testing#validating-a-store) — it's the same five-behaviour test every built-in adapter passes, including the concurrent-probe and lost-update checks.
+</Callout>
