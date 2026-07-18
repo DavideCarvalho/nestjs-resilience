@@ -1,5 +1,11 @@
 # @dudousxd/nestjs-resilience-telescope
 
+## 0.2.1
+
+### Patch Changes
+
+- 468bbd6: Metadata: package description no longer lists the removed `timeout`/`retry` events (only circuit-breaker / failover are recorded).
+
 ## 0.2.0
 
 ### Minor Changes
