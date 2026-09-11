@@ -84,10 +84,10 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@mikro-orm/core':
-        specifier: ^6.4.0
+        specifier: ^6.6.15
         version: 6.6.15
       '@mikro-orm/postgresql':
-        specifier: ^6.4.0
+        specifier: ^6.6.15
         version: 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)
       '@testcontainers/postgresql':
         specifier: ^10.18.0

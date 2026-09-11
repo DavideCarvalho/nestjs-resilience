@@ -39,8 +39,8 @@
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
-    "@mikro-orm/core": "^6.4.0",
-    "@mikro-orm/postgresql": "^6.4.0",
+    "@mikro-orm/core": "^6.6.15",
+    "@mikro-orm/postgresql": "^6.6.15",
     "@testcontainers/postgresql": "^10.18.0",
     "reflect-metadata": "^0.2.2",
     "tsup": "^8",
