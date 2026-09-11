@@ -34,7 +34,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@dudousxd/nestjs-diagnostics": "^0.2.3"
+    "@dudousxd/nestjs-diagnostics": "^0.7.0"
   },
   "peerDependencies": {
     "@dudousxd/nestjs-telescope": "^1.9.0"
