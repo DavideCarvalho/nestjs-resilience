@@ -51,7 +51,7 @@ importers:
         specifier: ^5.6
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-drizzle:
@@ -75,7 +75,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-mikro-orm:
@@ -102,7 +102,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-prisma:
@@ -126,7 +126,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-redis:
@@ -147,7 +147,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-typeorm:
@@ -174,7 +174,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/telescope:
@@ -199,7 +199,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3
+        specifier: ^3.2.6
         version: 3.2.6(@types/node@22.19.21)(jiti@2.7.0)(yaml@2.9.0)
 
 packages:
