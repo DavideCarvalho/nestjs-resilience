@@ -1,6 +1,6 @@
 {
   "name": "@dudousxd/nestjs-resilience",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Resilience policies for NestJS — timeout, retry, circuit breaker, and ordered failover, with pluggable circuit state stores",
   "license": "MIT",
   "author": "Davide Carvalho",
