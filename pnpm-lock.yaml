@@ -159,7 +159,7 @@ importers:
         specifier: ^10.18.0
         version: 10.28.0
       pg:
-        specifier: ^8.13.1
+        specifier: ^8.21.0
         version: 8.21.0
       reflect-metadata:
         specifier: ^0.2.2

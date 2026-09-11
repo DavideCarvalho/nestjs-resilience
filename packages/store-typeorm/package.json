@@ -39,7 +39,7 @@
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
     "@testcontainers/postgresql": "^10.18.0",
-    "pg": "^8.13.1",
+    "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
     "tsup": "^8",
     "typeorm": "^0.3.30",
