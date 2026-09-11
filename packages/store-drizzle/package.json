@@ -33,13 +33,13 @@
   },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
-    "drizzle-orm": "^0.36.0 || ^0.37.0 || ^0.38.0 || ^0.39.0 || ^0.40.0 || ^0.41.0 || ^0.42.0 || ^0.43.0 || ^0.44.0"
+    "drizzle-orm": "^0.36.0 || ^0.37.0 || ^0.38.0 || ^0.39.0 || ^0.40.0 || ^0.41.0 || ^0.42.0 || ^0.43.0 || ^0.44.0 || ^0.45.0"
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
     "@types/better-sqlite3": "^7.6.11",
     "better-sqlite3": "^11.10.0",
-    "drizzle-orm": "^0.44.7",
+    "drizzle-orm": "^0.45.0",
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6"
