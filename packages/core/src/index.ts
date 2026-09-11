@@ -1,4 +1,4 @@
-export const VERSION = '0.3.1';
+export const VERSION = '0.3.2';
 
 export type { Clock } from './clock';
 export { FakeClock, SystemClock, systemClock } from './clock';

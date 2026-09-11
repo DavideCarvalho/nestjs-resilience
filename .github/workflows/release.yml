@@ -115,6 +115,10 @@ jobs:
         uses: changesets/action@v1.9.0
         with:
           publish: pnpm release
+          # Without this the action runs a bare `changeset version`, which bumps package.json
+          # but never runs scripts/sync-version.mjs, so the `export const VERSION` literal that
+          # tsc bakes into dist keeps the previous release's number.
+          version: pnpm version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
