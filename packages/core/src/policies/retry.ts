@@ -11,7 +11,8 @@ export function exponential(
   return (attempt) => {
     const raw = baseMs * factor ** attempt;
     if (!opts.jitter) return raw;
-    // full jitter: a deterministic-enough spread without Math.random in tests is fine in prod
+    // Equal jitter, not full jitter: the delay keeps at least half of the computed backoff,
+    // so a retry can never fire almost immediately the way a uniform [0, raw) draw allows.
     return Math.round(raw * (0.5 + Math.random() / 2));
   };
 }
