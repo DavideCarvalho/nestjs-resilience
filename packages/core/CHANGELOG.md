@@ -1,5 +1,11 @@
 # @dudousxd/nestjs-resilience
 
+## 0.3.4
+
+### Patch Changes
+
+- ddf851d: Correct the exponential backoff jitter comment: the spread is equal jitter, not full jitter
+
 ## 0.3.3
 
 ### Patch Changes
