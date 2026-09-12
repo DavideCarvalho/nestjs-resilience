@@ -125,18 +125,24 @@ jobs:
           git commit -m "chore: version packages"
           git push origin HEAD:${{ github.ref_name }}
 
+      # v2 is required by the @changesets/cli v3 in this repo, not a routine bump. v1 learned what
+      # had been published by scraping `New tag: <pkg>@<version>` out of the CLI's stdout, and v3
+      # no longer prints that line — so the regex matched nothing, and since tag pushing and
+      # release creation both sit inside that loop, publishes landed on npm while the git tag and
+      # GitHub Release were silently skipped and the step still exited 0. v2 reads the structured
+      # NDJSON the CLI writes to $CHANGESETS_OUTPUT instead. That env var is handed to the publish
+      # script, so `pnpm release` must keep reaching `changeset publish` with the environment
+      # intact or the tag and Release go missing again.
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1.9.0
+        uses: changesets/action@v2.1.2
         with:
-          publish: pnpm release
+          publish-script: pnpm release
           # Without this the action runs a bare `changeset version`, which bumps package.json
           # but never runs scripts/sync-version.mjs, so the `export const VERSION` literal that
           # tsc bakes into dist keeps the previous release's number.
-          version: pnpm run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Deliberately no NODE_AUTH_TOKEN, and no NPM_TOKEN either: publish auth is npm
-          # trusted publishing over OIDC. setup-node writes
-          # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into ~/.npmrc regardless, so
-          # wiring an unset secret here would leave an EMPTY credential that npm sends instead
-          # of falling through to the OIDC exchange. Absent is not the same as empty.
+          version-script: pnpm run version
+        # Deliberately no NODE_AUTH_TOKEN, and no NPM_TOKEN either: publish auth is npm trusted
+        # publishing over OIDC. setup-node writes
+        # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into ~/.npmrc regardless, so
+        # wiring an unset secret here would leave an EMPTY credential that npm sends instead of
+        # falling through to the OIDC exchange. Absent is not the same as empty.
