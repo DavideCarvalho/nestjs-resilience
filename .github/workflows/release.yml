@@ -104,7 +104,7 @@ jobs:
           NODE
           node "$RUNNER_TEMP/renovate-release.mjs"
           if [ -z "$(git status --porcelain .changeset)" ]; then exit 0; fi
-          pnpm version
+          pnpm run version
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
@@ -118,7 +118,7 @@ jobs:
           # Without this the action runs a bare `changeset version`, which bumps package.json
           # but never runs scripts/sync-version.mjs, so the `export const VERSION` literal that
           # tsc bakes into dist keeps the previous release's number.
-          version: pnpm version
+          version: pnpm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
