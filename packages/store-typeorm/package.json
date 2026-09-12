@@ -6,6 +6,16 @@
     "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
     "directory": "packages/store-typeorm"
   },
+  "homepage": "https://davidecarvalho.github.io/aviary/docs/resilience",
+  "bugs": {
+    "url": "https://github.com/DavideCarvalho/nestjs-resilience/issues"
+  },
+  "keywords": [
+    "nestjs",
+    "resilience",
+    "store",
+    "typeorm"
+  ],
   "description": "TypeORM (Postgres) ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",

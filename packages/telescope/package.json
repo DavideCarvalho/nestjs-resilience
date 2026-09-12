@@ -6,6 +6,20 @@
     "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
     "directory": "packages/telescope"
   },
+  "homepage": "https://davidecarvalho.github.io/aviary/docs/resilience",
+  "bugs": {
+    "url": "https://github.com/DavideCarvalho/nestjs-resilience/issues"
+  },
+  "keywords": [
+    "nestjs",
+    "resilience",
+    "circuit-breaker",
+    "telescope",
+    "observability",
+    "watcher",
+    "extension",
+    "tanstack-intent"
+  ],
   "description": "nestjs-telescope extension for @dudousxd/nestjs-resilience — records circuit-breaker / failover events in the Telescope dashboard.",
   "license": "MIT",
   "author": "Davide Carvalho",
@@ -51,15 +65,5 @@
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6"
-  },
-  "keywords": [
-    "nestjs",
-    "resilience",
-    "circuit-breaker",
-    "telescope",
-    "observability",
-    "watcher",
-    "extension",
-    "tanstack-intent"
-  ]
+  }
 }

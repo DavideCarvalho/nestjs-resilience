@@ -6,6 +6,13 @@
     "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
     "directory": "packages/store-redis"
   },
+  "homepage": "https://davidecarvalho.github.io/aviary/docs/resilience",
+  "bugs": {
+    "url": "https://github.com/DavideCarvalho/nestjs-resilience/issues"
+  },
+  "keywords": [
+    "tanstack-intent"
+  ],
   "description": "Redis-backed distributed ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",
@@ -49,8 +56,5 @@
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6"
-  },
-  "keywords": [
-    "tanstack-intent"
-  ]
+  }
 }
