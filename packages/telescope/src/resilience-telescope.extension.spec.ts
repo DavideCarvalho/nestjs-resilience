@@ -2,12 +2,12 @@ import {
   type Entry,
   type ExtensionContext,
   InMemoryStorageProvider,
-  TELESCOPE_STORAGE,
   resolveConfig,
+  TELESCOPE_STORAGE,
 } from '@dudousxd/nestjs-telescope';
 import { describe, expect, it } from 'vitest';
-import { nestjsResilienceTelescope } from './resilience-telescope.extension';
 import { RESILIENCE_ENTRY_TYPE, type ResilienceEntryContent } from './resilience.watcher';
+import { nestjsResilienceTelescope } from './resilience-telescope.extension';
 
 let seq = 0;
 

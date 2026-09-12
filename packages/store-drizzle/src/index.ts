@@ -1,3 +1,3 @@
-export { DrizzleResilienceStore } from './drizzle.store';
 export type { DrizzleResilienceStoreOptions } from './drizzle.store';
-export { circuits, resilienceSchema, CIRCUITS_DDL } from './schema';
+export { DrizzleResilienceStore } from './drizzle.store';
+export { CIRCUITS_DDL, circuits, resilienceSchema } from './schema';

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ResilienceStore } from '../breaker/store';
 import type { CircuitSnapshot } from '../breaker/types';
-import { type EventSink, combineSinks, noopSink } from '../events';
+import { combineSinks, type EventSink, noopSink } from '../events';
 import { diagnosticsSink } from '../integration/diagnostics';
 import { eventEmitterSink } from '../integration/event-emitter';
 import { type FailoverOptions, failover } from '../policies/failover';

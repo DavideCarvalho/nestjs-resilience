@@ -1,9 +1,9 @@
 import { type Clock, systemClock } from '../clock';
 import {
   type CircuitState,
-  INITIAL_CIRCUIT_STATE,
   computeAdmit,
   computeRecord,
+  INITIAL_CIRCUIT_STATE,
 } from './state-machine';
 import type { ResilienceStore } from './store';
 import type { Admission, BreakerConfig, CircuitSnapshot, CircuitStatus } from './types';

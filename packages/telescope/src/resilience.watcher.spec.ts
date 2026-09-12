@@ -3,9 +3,9 @@ import { emit, resetRegistry, setContextAccessor } from '@dudousxd/nestjs-diagno
 import { collectWatcherEntries } from '@dudousxd/nestjs-telescope-testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+  isResilienceEvent,
   type ResilienceEntryContent,
   ResilienceWatcher,
-  isResilienceEvent,
 } from './resilience.watcher';
 
 describe('ResilienceWatcher', () => {
@@ -51,7 +51,7 @@ describe('ResilienceWatcher', () => {
     emit('resilience', 'circuit-opened', { type: 'circuit-opened', key: 'p' });
 
     expect(recorded).toHaveLength(1);
-    expect((recorded[0]?.content as ResilienceEntryContent).event).toBe('circuit-opened');
+    expect((recorded[0]?.content as ResilienceEntryContent)?.event).toBe('circuit-opened');
   });
 
   it('subscribes to a resilience channel registered before register()', async () => {
@@ -108,7 +108,7 @@ describe('ResilienceWatcher', () => {
 
     emit('resilience', 'short-circuited', { type: 'short-circuited', key: 'payments' });
 
-    expect((recorded[0]?.content as ResilienceEntryContent).traceId).toBe('trace-xyz');
+    expect((recorded[0]?.content as ResilienceEntryContent)?.traceId).toBe('trace-xyz');
     expect(recorded[0]?.tags).toContain('trace:trace-xyz');
   });
 
