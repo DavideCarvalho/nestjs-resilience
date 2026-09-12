@@ -1,6 +1,11 @@
 {
   "name": "@dudousxd/nestjs-resilience-store-mikro-orm",
   "version": "0.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
+    "directory": "packages/store-mikro-orm"
+  },
   "description": "MikroORM (Postgres) ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",

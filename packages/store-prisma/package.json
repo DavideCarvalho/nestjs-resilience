@@ -1,6 +1,11 @@
 {
   "name": "@dudousxd/nestjs-resilience-store-prisma",
   "version": "0.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
+    "directory": "packages/store-prisma"
+  },
   "description": "Prisma (Postgres) ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",

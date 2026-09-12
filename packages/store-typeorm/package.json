@@ -1,6 +1,11 @@
 {
   "name": "@dudousxd/nestjs-resilience-store-typeorm",
   "version": "0.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
+    "directory": "packages/store-typeorm"
+  },
   "description": "TypeORM (Postgres) ResilienceStore for @dudousxd/nestjs-resilience",
   "license": "MIT",
   "author": "Davide Carvalho",

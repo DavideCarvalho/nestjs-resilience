@@ -1,6 +1,11 @@
 {
   "name": "@dudousxd/nestjs-resilience",
   "version": "0.3.3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavideCarvalho/nestjs-resilience.git",
+    "directory": "packages/core"
+  },
   "description": "Resilience policies for NestJS — timeout, retry, circuit breaker, and ordered failover, with pluggable circuit state stores",
   "license": "MIT",
   "author": "Davide Carvalho",
