@@ -61,16 +61,16 @@
     }
   },
   "devDependencies": {
-    "@dudousxd/nestjs-diagnostics": "^0.7.0",
-    "@nestjs/common": "^12.0.1",
-    "@nestjs/core": "^12.0.1",
-    "@nestjs/platform-express": "^12.0.1",
-    "@nestjs/testing": "^12.0.1",
-    "@types/node": "^22.20.2",
-    "reflect-metadata": "^0.2",
-    "rxjs": "^7",
-    "tsup": "^8",
-    "typescript": "^5.6",
-    "vitest": "^3.2.6"
+    "@dudousxd/nestjs-diagnostics": "0.7.1",
+    "@nestjs/common": "12.0.1",
+    "@nestjs/core": "12.0.1",
+    "@nestjs/platform-express": "12.0.1",
+    "@nestjs/testing": "12.0.1",
+    "@types/node": "22.20.2",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
   }
 }

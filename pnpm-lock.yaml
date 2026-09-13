@@ -9,49 +9,49 @@ importers:
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.0.0
+        specifier: 2.5.13
         version: 2.5.13
       '@changesets/cli':
-        specifier: ^3.0.0
+        specifier: 3.0.2
         version: 3.0.2
       typescript:
-        specifier: ^5.6.0
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/core:
     devDependencies:
       '@dudousxd/nestjs-diagnostics':
-        specifier: ^0.7.0
+        specifier: 0.7.1
         version: 0.7.1(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)(reflect-metadata@0.2.2)
       '@nestjs/common':
-        specifier: ^12.0.1
+        specifier: 12.0.1
         version: 12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core':
-        specifier: ^12.0.1
+        specifier: 12.0.1
         version: 12.0.1(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express':
-        specifier: ^12.0.1
+        specifier: 12.0.1
         version: 12.0.1(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)
       '@nestjs/testing':
-        specifier: ^12.0.1
+        specifier: 12.0.1
         version: 12.0.1(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)(@nestjs/platform-express@12.0.1)
       '@types/node':
-        specifier: ^22.20.2
+        specifier: 22.20.2
         version: 22.20.2
       reflect-metadata:
-        specifier: ^0.2
+        specifier: 0.2.2
         version: 0.2.2
       rxjs:
-        specifier: ^7
+        specifier: 7.8.2
         version: 7.8.2
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.6
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-drizzle:
@@ -60,22 +60,22 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@types/better-sqlite3':
-        specifier: ^7.6.11
+        specifier: 7.6.13
         version: 7.6.13
       better-sqlite3:
-        specifier: ^11.10.0
+        specifier: 11.10.0
         version: 11.10.0
       drizzle-orm:
-        specifier: ^0.45.0
+        specifier: 0.45.2
         version: 0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3))
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-mikro-orm:
@@ -84,25 +84,25 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@mikro-orm/core':
-        specifier: ^6.6.15
+        specifier: 6.6.15
         version: 6.6.15
       '@mikro-orm/postgresql':
-        specifier: ^6.6.15
+        specifier: 6.6.15
         version: 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)
       '@testcontainers/postgresql':
-        specifier: ^10.18.0
+        specifier: 10.28.0
         version: 10.28.0
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 0.2.2
         version: 0.2.2
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-prisma:
@@ -111,22 +111,22 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@prisma/client':
-        specifier: ^6.19.3
+        specifier: 6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       '@testcontainers/postgresql':
-        specifier: ^10.18.0
+        specifier: 10.28.0
         version: 10.28.0
       prisma:
-        specifier: ^6.19.3
+        specifier: 6.19.3
         version: 6.19.3(typescript@5.9.3)
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-redis:
@@ -135,19 +135,19 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@testcontainers/redis':
-        specifier: ^10.18.0
+        specifier: 10.28.0
         version: 10.28.0
       ioredis:
-        specifier: ^5.4.2
+        specifier: 5.11.1
         version: 5.11.1
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/store-typeorm:
@@ -156,50 +156,50 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@testcontainers/postgresql':
-        specifier: ^10.18.0
+        specifier: 10.28.0
         version: 10.28.0
       pg:
-        specifier: ^8.21.0
+        specifier: 8.21.0
         version: 8.21.0
       reflect-metadata:
-        specifier: ^0.2.2
+        specifier: 0.2.2
         version: 0.2.2
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typeorm:
-        specifier: ^0.3.30
+        specifier: 0.3.30
         version: 0.3.30(better-sqlite3@11.10.0)(ioredis@5.11.1)(pg@8.21.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
   packages/telescope:
     dependencies:
       '@dudousxd/nestjs-diagnostics':
-        specifier: ^0.7.0
+        specifier: 0.7.1
         version: 0.7.1(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)(reflect-metadata@0.2.2)
     devDependencies:
       '@dudousxd/nestjs-telescope':
-        specifier: ^1.11.0
+        specifier: 1.11.0
         version: 1.11.0(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@dudousxd/nestjs-telescope-testing':
-        specifier: ^1.11.0
+        specifier: 1.11.0
         version: 1.11.0(@dudousxd/nestjs-telescope@1.11.0(@nestjs/common@12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@types/node':
-        specifier: ^22.20.2
+        specifier: 22.20.2
         version: 22.20.2
       tsup:
-        specifier: ^8
+        specifier: 8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.2.6
+        specifier: 3.2.6
         version: 3.2.6(@types/node@22.20.2)(jiti@2.7.0)(yaml@2.9.0)
 
 packages:
@@ -913,9 +913,6 @@ packages:
 
   '@types/node@18.19.130':
     resolution: {integrity: sha512-GRaXQx6jGfL8sKfaIDD6OupbIHBr9jv7Jnaml9tB7l4v068PAOXqfcujMMo5PhbIs6ggR1XODELqahT2R8v0fg==}
-
-  '@types/node@22.19.21':
-    resolution: {integrity: sha512-VMeFBSCKQKmm2swI2kW51SFusDqekC6q9trBCvJ/JliDchFSuoYYKN7yVNjPthP1HKZcx3U1gI/wTcEBjEFKTA==}
 
   '@types/node@22.20.2':
     resolution: {integrity: sha512-xlvWf4Vs9n1PEVYwP1n4vvG07M6y8WgvJ2t0vbrWTmijsIHp1cS+uJ2kMIRdY3nHZK0nCYKrPeD171+SzF4/zw==}
@@ -3461,7 +3458,7 @@ snapshots:
 
   '@types/better-sqlite3@7.6.13':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
 
   '@types/chai@5.2.3':
     dependencies:
@@ -3472,13 +3469,13 @@ snapshots:
 
   '@types/docker-modem@3.0.6':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2': 1.15.5
 
   '@types/dockerode@3.3.47':
     dependencies:
       '@types/docker-modem': 3.0.6
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2': 1.15.5
 
   '@types/estree@1.0.9': {}
@@ -3487,21 +3484,17 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@22.19.21':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.20.2':
     dependencies:
       undici-types: 6.21.0
 
   '@types/ssh2-streams@0.1.13':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
 
   '@types/ssh2@0.5.52':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2-streams': 0.1.13
 
   '@types/ssh2@1.15.5':
@@ -4699,7 +4692,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.1
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       long: 5.3.2
 
   proxy-addr@2.0.7:

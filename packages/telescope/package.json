@@ -53,17 +53,17 @@
     "access": "public"
   },
   "dependencies": {
-    "@dudousxd/nestjs-diagnostics": "^0.7.0"
+    "@dudousxd/nestjs-diagnostics": "0.7.1"
   },
   "peerDependencies": {
     "@dudousxd/nestjs-telescope": "^1.9.0"
   },
   "devDependencies": {
-    "@dudousxd/nestjs-telescope": "^1.11.0",
-    "@dudousxd/nestjs-telescope-testing": "^1.11.0",
-    "@types/node": "^22.20.2",
-    "tsup": "^8",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.6"
+    "@dudousxd/nestjs-telescope": "1.11.0",
+    "@dudousxd/nestjs-telescope-testing": "1.11.0",
+    "@types/node": "22.20.2",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
   }
 }
