@@ -61,6 +61,6 @@
     "reflect-metadata": "^0.2.2",
     "tsup": "^8",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.6"
+    "vitest": "^5.0.0"
   }
 }
