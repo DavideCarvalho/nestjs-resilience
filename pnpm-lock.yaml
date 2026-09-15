@@ -63,11 +63,11 @@ importers:
         specifier: ^7.6.11
         version: 7.6.13
       better-sqlite3:
-        specifier: ^11.10.0
-        version: 11.10.0
+        specifier: ^13.0.0
+        version: 13.0.3
       drizzle-orm:
         specifier: ^0.45.0
-        version: 0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3))
+        version: 0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.3)(knex@3.2.10(better-sqlite3@13.0.3)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3))
       tsup:
         specifier: ^8
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
@@ -88,7 +88,7 @@ importers:
         version: 6.6.15
       '@mikro-orm/postgresql':
         specifier: ^6.6.15
-        version: 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)
+        version: 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@13.0.3)
       '@testcontainers/postgresql':
         specifier: ^10.18.0
         version: 10.28.0
@@ -1091,6 +1091,10 @@ packages:
   better-sqlite3@11.10.0:
     resolution: {integrity: sha512-EwhOpyXiOEL/lKzHz9AW1msWFNzGc/z+LzeB3/jnFJpxu+th2yqvzsSWas1v9jgs9+xiXJcD5A8CJxAG2TaghQ==}
 
+  better-sqlite3@13.0.3:
+    resolution: {integrity: sha512-RbOBxmLBG8uvFUc15X9+9SFemKcQ0WBuISBVkpuiaUB2qblC8UWlHEjdWVoZ8AdhSwmoEgsiXKfopX0CQxaACQ==}
+    engines: {node: '>=22'}
+
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
 
@@ -2001,6 +2005,10 @@ packages:
   node-abi@3.92.0:
     resolution: {integrity: sha512-KdHvFWZjEKDf0cakgFjebl371GPsISX2oZHcuyKqM7DtogIsHrqKeLTo8wBHxaXRAQlY2PsPlZmfo+9ZCxEREQ==}
     engines: {node: '>=10'}
+
+  node-addon-api@8.9.2:
+    resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
@@ -3197,14 +3205,14 @@ snapshots:
       mikro-orm: 6.6.15
       reflect-metadata: 0.2.2
 
-  '@mikro-orm/knex@6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)(pg@8.20.0)':
+  '@mikro-orm/knex@6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@13.0.3)(pg@8.20.0)':
     dependencies:
       '@mikro-orm/core': 6.6.15
       fs-extra: 11.3.3
-      knex: 3.2.10(better-sqlite3@11.10.0)(pg@8.20.0)
+      knex: 3.2.10(better-sqlite3@13.0.3)(pg@8.20.0)
       sqlstring: 2.3.3
     optionalDependencies:
-      better-sqlite3: 11.10.0
+      better-sqlite3: 13.0.3
     transitivePeerDependencies:
       - mysql
       - mysql2
@@ -3215,10 +3223,10 @@ snapshots:
       - supports-color
       - tedious
 
-  '@mikro-orm/postgresql@6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)':
+  '@mikro-orm/postgresql@6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@13.0.3)':
     dependencies:
       '@mikro-orm/core': 6.6.15
-      '@mikro-orm/knex': 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@11.10.0)(pg@8.20.0)
+      '@mikro-orm/knex': 6.6.15(@mikro-orm/core@6.6.15)(better-sqlite3@13.0.3)(pg@8.20.0)
       pg: 8.20.0
       postgres-array: 3.0.4
       postgres-date: 2.1.0
@@ -3667,6 +3675,10 @@ snapshots:
       bindings: 1.5.0
       prebuild-install: 7.1.3
 
+  better-sqlite3@13.0.3:
+    dependencies:
+      node-addon-api: 8.9.2
+
   bindings@1.5.0:
     dependencies:
       file-uri-to-path: 1.0.0
@@ -3937,12 +3949,12 @@ snapshots:
 
   dotenv@17.3.1: {}
 
-  drizzle-orm@0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3)):
+  drizzle-orm@0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.3)(knex@3.2.10(better-sqlite3@13.0.3)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3)):
     optionalDependencies:
       '@prisma/client': 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       '@types/better-sqlite3': 7.6.13
-      better-sqlite3: 11.10.0
-      knex: 3.2.10(better-sqlite3@11.10.0)(pg@8.21.0)
+      better-sqlite3: 13.0.3
+      knex: 3.2.10(better-sqlite3@13.0.3)(pg@8.21.0)
       pg: 8.21.0
       prisma: 6.19.3(typescript@5.9.3)
 
@@ -4338,7 +4350,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  knex@3.2.10(better-sqlite3@11.10.0)(pg@8.20.0):
+  knex@3.2.10(better-sqlite3@13.0.3)(pg@8.20.0):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -4355,12 +4367,12 @@ snapshots:
       tarn: 3.0.2
       tildify: 2.0.0
     optionalDependencies:
-      better-sqlite3: 11.10.0
+      better-sqlite3: 13.0.3
       pg: 8.20.0
     transitivePeerDependencies:
       - supports-color
 
-  knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0):
+  knex@3.2.10(better-sqlite3@13.0.3)(pg@8.21.0):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -4377,7 +4389,7 @@ snapshots:
       tarn: 3.0.2
       tildify: 2.0.0
     optionalDependencies:
-      better-sqlite3: 11.10.0
+      better-sqlite3: 13.0.3
       pg: 8.21.0
     transitivePeerDependencies:
       - supports-color
@@ -4497,6 +4509,8 @@ snapshots:
   node-abi@3.92.0:
     dependencies:
       semver: 7.8.4
+
+  node-addon-api@8.9.2: {}
 
   node-fetch-native@1.6.7: {}
 
