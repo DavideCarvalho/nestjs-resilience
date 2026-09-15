@@ -58,7 +58,7 @@
     "reflect-metadata": "^0.2.2",
     "tsup": "^8",
     "typeorm": "^0.3.30",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.0",
     "vitest": "^3.2.6"
   }
 }
