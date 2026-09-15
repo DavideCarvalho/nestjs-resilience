@@ -60,14 +60,14 @@ importers:
         specifier: workspace:^
         version: link:../core
       '@types/better-sqlite3':
-        specifier: ^7.6.11
-        version: 7.6.13
+        specifier: ^9.0.0
+        version: 9.6.0
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0
       drizzle-orm:
         specifier: ^0.45.0
-        version: 0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3))
+        version: 0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@9.6.0)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3))
       tsup:
         specifier: ^8
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(typescript@5.9.3)(yaml@2.9.0)
@@ -893,8 +893,8 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
-  '@types/better-sqlite3@7.6.13':
-    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
+  '@types/better-sqlite3@9.6.0':
+    resolution: {integrity: sha512-ZEEwBSgMu7GYJOynoagg5X9JbxfL6dTJDsgViJIqh67jV44kyOr9RXfmFjLK5rzC4MWssP06t9hu/JwGDnUbCg==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -913,9 +913,6 @@ packages:
 
   '@types/node@18.19.130':
     resolution: {integrity: sha512-GRaXQx6jGfL8sKfaIDD6OupbIHBr9jv7Jnaml9tB7l4v068PAOXqfcujMMo5PhbIs6ggR1XODELqahT2R8v0fg==}
-
-  '@types/node@22.19.21':
-    resolution: {integrity: sha512-VMeFBSCKQKmm2swI2kW51SFusDqekC6q9trBCvJ/JliDchFSuoYYKN7yVNjPthP1HKZcx3U1gI/wTcEBjEFKTA==}
 
   '@types/node@22.20.2':
     resolution: {integrity: sha512-xlvWf4Vs9n1PEVYwP1n4vvG07M6y8WgvJ2t0vbrWTmijsIHp1cS+uJ2kMIRdY3nHZK0nCYKrPeD171+SzF4/zw==}
@@ -3459,9 +3456,9 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@types/better-sqlite3@7.6.13':
+  '@types/better-sqlite3@9.6.0':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
 
   '@types/chai@5.2.3':
     dependencies:
@@ -3472,13 +3469,13 @@ snapshots:
 
   '@types/docker-modem@3.0.6':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2': 1.15.5
 
   '@types/dockerode@3.3.47':
     dependencies:
       '@types/docker-modem': 3.0.6
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2': 1.15.5
 
   '@types/estree@1.0.9': {}
@@ -3487,21 +3484,17 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@22.19.21':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.20.2':
     dependencies:
       undici-types: 6.21.0
 
   '@types/ssh2-streams@0.1.13':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
 
   '@types/ssh2@0.5.52':
     dependencies:
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       '@types/ssh2-streams': 0.1.13
 
   '@types/ssh2@1.15.5':
@@ -3937,10 +3930,10 @@ snapshots:
 
   dotenv@17.3.1: {}
 
-  drizzle-orm@0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3)):
+  drizzle-orm@0.45.2(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/better-sqlite3@9.6.0)(better-sqlite3@11.10.0)(knex@3.2.10(better-sqlite3@11.10.0)(pg@8.21.0))(pg@8.21.0)(prisma@6.19.3(typescript@5.9.3)):
     optionalDependencies:
       '@prisma/client': 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
-      '@types/better-sqlite3': 7.6.13
+      '@types/better-sqlite3': 9.6.0
       better-sqlite3: 11.10.0
       knex: 3.2.10(better-sqlite3@11.10.0)(pg@8.21.0)
       pg: 8.21.0
@@ -4699,7 +4692,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.1
-      '@types/node': 22.19.21
+      '@types/node': 22.20.2
       long: 5.3.2
 
   proxy-addr@2.0.7:
