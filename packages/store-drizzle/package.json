@@ -53,7 +53,7 @@
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
     "@types/better-sqlite3": "^7.6.11",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^13.0.0",
     "drizzle-orm": "^0.45.0",
     "tsup": "^8",
     "typescript": "^5.9.3",
