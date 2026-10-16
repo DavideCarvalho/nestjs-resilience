@@ -57,7 +57,7 @@
     "@dudousxd/nestjs-resilience": "workspace:^",
     "@prisma/client": "^6.19.3",
     "@testcontainers/postgresql": "^10.18.0",
-    "prisma": "^6.19.3",
+    "prisma": "^7.0.0",
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6"
