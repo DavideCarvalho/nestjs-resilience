@@ -1,5 +1,11 @@
 # @dudousxd/nestjs-resilience-telescope
 
+## 0.2.2
+
+### Patch Changes
+
+- fix(deps): update dependency @dudousxd/nestjs-diagnostics to ^0.7.1 (#38)
+
 ## 0.2.1
 
 ### Patch Changes
