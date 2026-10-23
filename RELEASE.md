@@ -29,8 +29,8 @@ Make sure the `@dudousxd` org/scope exists on npm and your account has publish r
 
 1. During development, run `pnpm changeset` and follow the prompts to describe your changes. Commit the generated `.changeset/*.md` file.
 2. Push to `master` (or open a PR and merge it).
-3. The `release.yml` workflow automatically opens a **"Version Packages"** PR that bumps versions and updates changelogs by consuming the pending changesets.
-4. Review and **merge the "Version Packages" PR** → the workflow then runs `changeset publish`, which publishes all updated packages to npm.
+3. On that push the `release.yml` workflow consumes the pending changesets (`pnpm version-packages`: bumps versions, updates changelogs, syncs the `VERSION` consts), pushes that as a `chore: version packages` commit to `master`, and runs `changeset publish` in the same run. There is no "Version Packages" PR to merge.
+4. Running the workflow manually publishes a throwaway beta snapshot (`0.0.0-beta-<timestamp>`) under the `beta` dist-tag, leaving changesets and git untouched.
 
 ### Pending changesets (initial releases)
 
@@ -42,7 +42,7 @@ There are **7 pending changesets** covering the initial `0.1.0` releases of all 
 - `@dudousxd/nestjs-resilience-store-mikro-orm`
 - `@dudousxd/nestjs-resilience-store-prisma`
 
-Plus a minor bump for the event-emitter integration. Merging the first "Version Packages" PR will publish all of these.
+Plus a minor bump for the event-emitter integration. The first release run after they landed published all of these.
 
 ## Local changeset commands
 
