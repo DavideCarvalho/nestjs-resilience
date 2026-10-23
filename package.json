@@ -9,6 +9,7 @@
     "typecheck": "pnpm -r typecheck",
     "changeset": "changeset",
     "version": "changeset version && node scripts/sync-version.mjs",
+    "version-packages": "pnpm run version",
     "release": "pnpm -r build && changeset publish"
   },
   "devDependencies": {
