@@ -1,7 +1,8 @@
+import { FakeClock } from '@dudousxd/nestjs-resilience';
 import { runResilienceStoreContract } from '@dudousxd/nestjs-resilience/testing';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { DataSource } from 'typeorm';
-import { afterAll, beforeAll, describe } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TypeOrmResilienceStore } from './typeorm.store';
 
 const skip = !!process.env.SKIP_TESTCONTAINERS;
@@ -40,5 +41,36 @@ suite('TypeOrmResilienceStore (real Postgres)', () => {
         return orig;
       },
     }) as TypeOrmResilienceStore;
+  });
+
+  it('leaves the row untouched across successful calls on a closed circuit', async () => {
+    const cfg = { threshold: 3, cooldownMs: 1000 };
+    const store = new TypeOrmResilienceStore(ds, { clock: new FakeClock() });
+    const xmin = async () =>
+      (
+        (await ds.query('SELECT xmin::text AS v FROM resilience_circuits WHERE key = $1', [
+          'clean',
+        ])) as { v: string }[]
+      )[0]?.v;
+    await store.record('clean', cfg, false, false);
+    await store.record('clean', cfg, true, false);
+    const before = await xmin();
+    expect(before).toBeDefined();
+    for (let i = 0; i < 5; i++) {
+      const a = await store.admit('clean', cfg);
+      expect(a.allow).toBe(true);
+      await store.record('clean', cfg, true, a.probe);
+    }
+    expect(await xmin()).toBe(before);
+    expect(await store.snapshot('clean')).toEqual({ status: 'closed', failures: 0 });
+  });
+
+  it('does not create a row for a key that has only ever succeeded', async () => {
+    const cfg = { threshold: 3, cooldownMs: 1000 };
+    const store = new TypeOrmResilienceStore(ds);
+    await store.admit('fresh', cfg);
+    await store.record('fresh', cfg, true, false);
+    const rows = await ds.query('SELECT 1 FROM resilience_circuits WHERE key = $1', ['fresh']);
+    expect(rows).toHaveLength(0);
   });
 });

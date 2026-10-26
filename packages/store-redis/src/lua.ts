@@ -32,7 +32,8 @@ return {0, 0, 'half-open'}
 
 /**
  * Atomic record. KEYS[1] = circuit hash. ARGV: ok(1/0), probe(1/0), now, threshold, cooldownMs.
- * Mirrors InMemoryResilienceStore.record. Returns the resulting status string.
+ * Mirrors InMemoryResilienceStore.record. Returns the resulting status string. A success on a circuit
+ * that is already closed with no failures writes nothing.
  */
 export const RECORD_LUA = `
 local h = KEYS[1]
@@ -48,7 +49,12 @@ if probe then
 end
 
 if ok then
-  redis.call('HSET', h, 'status', 'closed', 'failures', 0, 'openUntil', 0)
+  local cur = redis.call('HMGET', h, 'status', 'failures', 'openUntil')
+  local clean = (cur[1] == false or cur[1] == 'closed')
+    and tonumber(cur[2] or '0') == 0 and tonumber(cur[3] or '0') == 0
+  if not clean then
+    redis.call('HSET', h, 'status', 'closed', 'failures', 0, 'openUntil', 0)
+  end
   return 'closed'
 end
 

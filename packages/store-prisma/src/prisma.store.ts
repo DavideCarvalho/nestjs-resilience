@@ -30,6 +30,9 @@ function prismaDriver(prisma: PrismaLike): SqlDriver {
         }),
       ),
     read: (sql, params) => prisma.$queryRawUnsafe<unknown[]>(sql, ...params),
+    run: async (sql, params) => {
+      await prisma.$executeRawUnsafe(sql, ...params);
+    },
     exec: async (sql) => {
       await prisma.$executeRawUnsafe(sql);
     },

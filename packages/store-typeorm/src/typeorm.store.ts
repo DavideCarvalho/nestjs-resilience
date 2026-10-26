@@ -24,6 +24,9 @@ function typeOrmDriver(ds: DataSource): SqlDriver {
         }),
       ),
     read: (sql, params) => ds.query(sql, params) as Promise<unknown[]>,
+    run: async (sql, params) => {
+      await ds.query(sql, params);
+    },
     exec: async (sql) => {
       await ds.query(sql);
     },

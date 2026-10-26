@@ -31,6 +31,9 @@ function mikroOrmDriver(orm: MikroORM): SqlDriver {
         });
       }),
     read: (sql, params) => orm.em.getConnection().execute(sql, params, 'all') as Promise<unknown[]>,
+    run: async (sql, params) => {
+      await orm.em.getConnection('write').execute(sql, params, 'run');
+    },
     exec: async (sql) => {
       await orm.em.getConnection().execute(sql);
     },
