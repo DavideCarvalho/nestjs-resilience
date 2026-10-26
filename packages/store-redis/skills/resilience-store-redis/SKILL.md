@@ -18,7 +18,9 @@ metadata:
 `RedisResilienceStore` implements the core `ResilienceStore` contract on Redis, so circuit-breaker
 state (failure counts, open/half-open status, the probe slot) is shared across every process in a
 fleet. Admit and record run as atomic Lua scripts (`cbAdmit` / `cbRecord`), giving the
-exactly-one-half-open-probe guarantee under concurrent load.
+exactly-one-half-open-probe guarantee under concurrent load. Calls on a healthy closed circuit
+write nothing (a clean success skips the `HSET`), so a key that has never failed has no hash; a
+missing hash reads as closed.
 
 ## Setup
 

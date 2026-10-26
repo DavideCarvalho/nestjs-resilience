@@ -18,6 +18,8 @@ interface Clock {
 }
 ```
 
+`delay` rejects with `signal.reason` when the signal aborts first, and removes its abort listener once it settles, so retry attempts on one long-lived signal don't pile up listeners. A custom `Clock` should do the same.
+
 `timeout`, `retry`, `circuitBreaker`'s store, and `InMemoryResilienceStore` all take `{ clock }`. Pass a `FakeClock` and call `advance(ms)` to fire timers instantly:
 
 ```ts
