@@ -49,9 +49,10 @@ if probe then
 end
 
 if ok then
-  local cur = redis.call('HMGET', h, 'status', 'failures', 'openUntil')
-  local clean = (cur[1] == false or cur[1] == 'closed')
-    and tonumber(cur[2] or '0') == 0 and tonumber(cur[3] or '0') == 0
+  local current = redis.call('HGET', h, 'status')
+  local clean = (current == false or current == 'closed')
+    and tonumber(redis.call('HGET', h, 'failures') or '0') == 0
+    and tonumber(redis.call('HGET', h, 'openUntil') or '0') == 0
   if not clean then
     redis.call('HSET', h, 'status', 'closed', 'failures', 0, 'openUntil', 0)
   end
