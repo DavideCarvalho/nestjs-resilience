@@ -1,4 +1,4 @@
-export const VERSION = '0.3.4';
+export const VERSION = '0.3.5';
 
 export { InMemoryResilienceStore } from './breaker/in-memory.store';
 export type {
