@@ -63,7 +63,10 @@ const fleet = new RedisResilienceStore(redis);
 `SqlResilienceStore(driver, opts?)` implements the contract over any transactional driver. The driver
 is a tiny `SqlDriver`: a placeholder style (`'numbered'` for Postgres `$1`, `'positional'` for `?`),
 `transaction()` (the breaker relies on `SELECT … FOR UPDATE` locking inside it), a non-transactional
-`read()`, and `exec()` for DDL. Call `ensureSchema()` once at startup — it runs the idempotent
+`read()`, an optional non-transactional `run()` for single-statement writes, and `exec()` for DDL.
+Healthy closed-circuit calls never open a transaction: `admit` answers from `read()` unless the
+circuit transitions, and a success is one conditional `UPDATE` (via `run()`, or a one-statement
+`transaction()` when `run` is absent). Call `ensureSchema()` once at startup — it runs the idempotent
 `CIRCUITS_DDL`.
 
 ```ts
@@ -74,6 +77,7 @@ const driver: SqlDriver = {
     all: (sql, params) => tx.query(sql, params).then((r) => r.rows),
   })),
   read: (sql, params) => db.query(sql, params).then((r) => r.rows),
+  run: (sql, params) => db.query(sql, params).then(() => undefined),
   exec: (sql) => db.query(sql).then(() => undefined),
 };
 

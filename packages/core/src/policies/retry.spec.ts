@@ -1,3 +1,4 @@
+import { getEventListeners } from 'node:events';
 import { describe, expect, it, vi } from 'vitest';
 import { FakeClock } from '../clock';
 import { exponential, retry } from './retry';
@@ -53,5 +54,22 @@ describe('retry', () => {
     expect(b(0)).toBe(100);
     expect(b(1)).toBe(200);
     expect(b(2)).toBe(400);
+  });
+});
+
+describe('retry abort listeners', () => {
+  it('leaves no abort listener on the parent signal after retrying', async () => {
+    const ac = new AbortController();
+    let calls = 0;
+    const result = await retry({ attempts: 6 }).execute(
+      async () => {
+        calls += 1;
+        if (calls < 6) throw new Error('flaky');
+        return 'ok';
+      },
+      { signal: ac.signal, attempt: 0 },
+    );
+    expect(result).toBe('ok');
+    expect(getEventListeners(ac.signal, 'abort')).toHaveLength(0);
   });
 });

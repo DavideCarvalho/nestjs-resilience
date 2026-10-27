@@ -65,7 +65,7 @@ ResilienceModule.forRootAsync({
 });
 ```
 
-`admit`/`record` each run as a single atomic Lua script — no schema, no migration.
+`admit`/`record` each run as a single atomic Lua script — no schema, no migration. A healthy closed circuit is never written: a success on a clean circuit skips the `HSET`, so a key that has never failed has no hash (it reads as closed).
 
 </Tab>
 <Tab value="TypeORM">
@@ -203,7 +203,8 @@ interface SqlTx {
 interface SqlDriver {
   readonly placeholders: SqlPlaceholderStyle;
   transaction<R>(body: (tx: SqlTx) => Promise<R>): Promise<R>; // MUST allow `SELECT … FOR UPDATE`
-  read(sql: string, params: unknown[]): Promise<unknown[]>;    // non-transactional, for snapshot()
+  read(sql: string, params: unknown[]): Promise<unknown[]>;    // non-transactional read
+  run?(sql: string, params: unknown[]): Promise<void>;         // optional non-transactional write
   exec(sql: string): Promise<void>;                            // run a DDL statement
 }
 
@@ -235,6 +236,7 @@ function typeOrmDriver(ds: DataSource): SqlDriver {
         }),
       ),
     read: (sql, params) => ds.query(sql, params) as Promise<unknown[]>,
+    run: async (sql, params) => { await ds.query(sql, params); },
     exec: async (sql) => { await ds.query(sql); },
   };
 }
@@ -243,6 +245,10 @@ function typeOrmDriver(ds: DataSource): SqlDriver {
 <Callout type="warn">
 Atomicity lives in **your `transaction`**. `SqlResilienceStore` issues a `SELECT … FOR UPDATE` inside the callback and relies on it holding a row lock for the duration of the transaction — that's what hands the half-open probe to exactly one instance. If your engine can't lock the row (or serialize the transaction), the store is not safe under concurrency.
 </Callout>
+
+The common path stays off the lock. `admit` reads the row with a plain `read` and answers directly whenever the decision leaves the state unchanged (closed, open and still cooling down, or half-open with every probe slot taken); only a transition takes the transaction. A success that isn't a probe is one conditional `UPDATE` that matches no row when the circuit is already clean, so a healthy circuit costs two plain statements per call and is never rewritten. That `UPDATE` goes through `run` when the driver provides it, and through a one-statement `transaction` otherwise. The TypeORM, Prisma and MikroORM adapters provide `run`; implement it in your own driver so the success path skips the transaction too.
+
+A key that has only ever succeeded has no row in the table. A missing row reads as the closed default, so `snapshot()` reports the same state either way; don't rely on the table to list every circuit key.
 
 The DDL is exposed as **`CIRCUITS_DDL`** (a plain, dialect-agnostic `CREATE TABLE IF NOT EXISTS` string) and applied by `ensureSchema()`. Call it once on boot, or feed `CIRCUITS_DDL` to your migration tool instead:
 
