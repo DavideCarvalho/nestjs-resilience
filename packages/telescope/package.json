@@ -63,7 +63,7 @@
     "@dudousxd/nestjs-telescope-testing": "^1.11.0",
     "@types/node": "^22.20.2",
     "tsup": "^8",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.0",
     "vitest": "^3.2.6"
   }
 }
