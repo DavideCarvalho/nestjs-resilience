@@ -1,5 +1,8 @@
 # @dudousxd/nestjs-resilience-store-mikro-orm
 
+> [!WARNING]
+> **Deprecated.** NestJS now ships its own resilience package, [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience): retry, timeout, circuit breaker, bulkhead, outbound rate limit, fallback, presets and decorators. Use it instead; this package gets no new releases. The one thing without an equivalent is the distributed circuit-breaker state (the `ResilienceStore` packages): the official breaker keeps its state in each process. See [Migrating to `@nestjs/resilience`](https://davidecarvalho.github.io/aviary/docs/resilience/migrate-to-nestjs-resilience).
+
 > **Postgres only.** This adapter relies on Postgres-specific SQL (`SELECT … FOR UPDATE`, `BIGINT`, `INSERT … ON CONFLICT DO NOTHING`). You must pass a `MikroORM` instance backed by `@mikro-orm/postgresql`. Using any other driver (SQLite, MySQL, MariaDB, …) will result in a runtime error.
 
 A MikroORM (Postgres) `ResilienceStore` for `@dudousxd/nestjs-resilience`. Circuit-breaker state — status, failure count, open-until timestamp, and in-flight half-open probes — is stored in a Postgres table via MikroORM. The store reuses the core's pure state machine (`computeAdmit`, `computeRecord`) so behavior is identical to the in-memory implementation. State transitions and failure counts run in MikroORM transactions with pessimistic `SELECT … FOR UPDATE` locking, serializing concurrent callers and guaranteeing exactly-one half-open probe with no lost updates. Calls on a healthy closed circuit skip the lock: `admit` is a plain read and a success is a conditional `UPDATE` that writes nothing when the circuit is already clean.

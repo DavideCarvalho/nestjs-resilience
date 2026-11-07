@@ -1,5 +1,8 @@
 # @dudousxd/nestjs-resilience-store-redis
 
+> [!WARNING]
+> **Deprecated.** NestJS now ships its own resilience package, [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience): retry, timeout, circuit breaker, bulkhead, outbound rate limit, fallback, presets and decorators. Use it instead; this package gets no new releases. The one thing without an equivalent is the distributed circuit-breaker state (the `ResilienceStore` packages): the official breaker keeps its state in each process. See [Migrating to `@nestjs/resilience`](https://davidecarvalho.github.io/aviary/docs/resilience/migrate-to-nestjs-resilience).
+
 A distributed Redis-backed `ResilienceStore` for `@dudousxd/nestjs-resilience`. Circuit-breaker state — status, failure count, open-until timestamp, and in-flight half-open probes — is stored in Redis so every instance in a fleet shares the same view. Mutations (`admit` and `record`) are implemented as atomic Lua scripts, which guarantees exactly-one half-open probe and no lost updates across concurrent processes. Both `ioredis` and `@dudousxd/nestjs-resilience` are peer dependencies.
 
 ## Install

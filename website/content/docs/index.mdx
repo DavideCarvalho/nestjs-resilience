@@ -8,8 +8,8 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 **`@dudousxd/nestjs-resilience`** is a NestJS-native resilience toolkit — composable **timeout**, **retry**, **circuit breaker** and **failover** policies, with a pluggable, distributed circuit-breaker store. Think *cockatiel for NestJS*, wired into the ecosystem's conventions ([diagnostics](https://github.com/DavideCarvalho/nestjs-diagnostics), [context](https://github.com/DavideCarvalho/nestjs-context), event-emitter).
 
-<Callout type="info" title="Alpha">
-Published as alpha at `0.2.0`. The API here matches the current source. Pin a version in production.
+<Callout type="warn" title="Deprecated — use @nestjs/resilience">
+NestJS now ships [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience): retry, timeout, circuit breaker, bulkhead, outbound rate limit, fallback, presets and decorators. Use it instead; this package gets no new releases. Only the distributed circuit-breaker state has no official equivalent. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
 </Callout>
 
 ## Compose policies, outer to inner
