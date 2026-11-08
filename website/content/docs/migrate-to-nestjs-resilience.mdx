@@ -9,6 +9,7 @@ icon: ArrowRightLeft
 ```bash
 pnpm remove @dudousxd/nestjs-resilience @dudousxd/nestjs-resilience-store-redis  # and any other store / telescope package
 pnpm add @nestjs/resilience
+pnpm add @dudousxd/nestjs-telescope-official  # only if you used @dudousxd/nestjs-resilience-telescope
 ```
 
 | `@dudousxd/nestjs-resilience` | `@nestjs/resilience` |
@@ -22,6 +23,7 @@ pnpm add @nestjs/resilience
 | `ResilienceModule` / `ResilienceService` | the official `ResilienceModule` / `ResilienceService` (same names, different package) |
 | `BrokenCircuitError` / `TimeoutError` | `CircuitOpenError` / `ResilienceTimeoutError` |
 | `diagnosticsSink` / `eventEmitterSink` (`aviary:resilience:*`) | `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels |
+| `@dudousxd/nestjs-resilience-telescope` (`nestjsResilienceTelescope()`) | `@dudousxd/nestjs-telescope-official` (`NestResilienceWatcher`, or `officialWatchers()`) |
 | `ResilienceStore` and the store packages (distributed breaker state) | no equivalent: the official breaker keeps its state in each process, shared by `name` |
 
 ## What changes in behaviour
@@ -30,6 +32,6 @@ pnpm add @nestjs/resilience
 - **Client errors don't trip it.** By default 4xx errors other than 408 and 429 are not recorded as failures (`recordIf`).
 - **Breaker state lives in each process.** Policies with the same `name` share state inside one process; each pod learns on its own. If you relied on a `ResilienceStore` to share state across a fleet, there is no official replacement.
 - **Decorators are for entrypoints.** The official decorators apply to routes, resolvers, gateways and message handlers. In a service, inject `ResilienceService` (`create()` / `preset()`) or build the policies yourself.
-- **Events** come from `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels, which Telescope records.
+- **Events** come from `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels. Telescope records them with `NestResilienceWatcher` from `@dudousxd/nestjs-telescope-official` (`officialWatchers()` includes it).
 
 After the switch, drop the `resilience_circuits` table and the `resilience:cb:*` Redis keys the stores left behind.

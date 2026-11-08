@@ -7,6 +7,10 @@ icon: Rocket
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 import { Callout } from 'fumadocs-ui/components/callout';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 Getting `nestjs-resilience` running is three steps: install the package, compose a policy, and (optionally) register `ResilienceModule.forRoot()` so you can reach the policies through DI. You can use the policies entirely standalone — the NestJS surfaces are a convenience, not a requirement.
 
 ---
