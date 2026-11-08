@@ -1,5 +1,11 @@
 # @dudousxd/nestjs-resilience-store-drizzle
 
+## 0.2.1
+
+### Patch Changes
+
+- 7863c0d: Deprecated: use NestJS's own [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience). This is the last release; it carries only the deprecation notice and the migration guide. The distributed circuit-breaker state (the store packages) has no official equivalent: the official breaker keeps its state in each process.
+
 ## 0.2.0
 
 ### Minor Changes
