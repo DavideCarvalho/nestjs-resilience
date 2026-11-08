@@ -1,5 +1,8 @@
 # @dudousxd/nestjs-resilience-telescope
 
+> [!WARNING]
+> **Deprecated.** NestJS now ships its own resilience package, [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience): retry, timeout, circuit breaker, bulkhead, outbound rate limit, fallback, presets and decorators. Use it instead; this package gets no new releases. The one thing without an equivalent is the distributed circuit-breaker state (the `ResilienceStore` packages): the official breaker keeps its state in each process. See [Migrating to `@nestjs/resilience`](https://davidecarvalho.github.io/aviary/docs/resilience/migrate-to-nestjs-resilience).
+
 A [`@dudousxd/nestjs-telescope`](https://github.com/DavideCarvalho/nestjs-telescope) extension that
 surfaces [`@dudousxd/nestjs-resilience`](https://github.com/DavideCarvalho/nestjs-resilience) state
 transitions — circuit opened/closed/half-open, short-circuited, failover, timeout, retry — in the

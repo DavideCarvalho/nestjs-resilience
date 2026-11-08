@@ -11,6 +11,9 @@
 
 ---
 
+> [!WARNING]
+> **Deprecated.** NestJS now ships its own resilience package, [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience): retry, timeout, circuit breaker, bulkhead, outbound rate limit, fallback, presets and decorators. Use it instead; this package gets no new releases. The one thing without an equivalent is the distributed circuit-breaker state (the `ResilienceStore` packages): the official breaker keeps its state in each process. See [Migrating to `@nestjs/resilience`](https://davidecarvalho.github.io/aviary/docs/resilience/migrate-to-nestjs-resilience).
+
 # nestjs-resilience
 
 A NestJS-native resilience toolkit — composable **timeout**, **retry**, **circuit breaker**, and
@@ -34,6 +37,21 @@ decorators** (wrapped at startup by a `DiscoveryService` explorer), and an injec
 **`ResilienceService`** via `ResilienceModule.forRoot()`. State transitions emit over
 [`@dudousxd/nestjs-diagnostics`](https://davidecarvalho.github.io/aviary/docs/diagnostics) on the
 `aviary:resilience:*` channel and, optionally, an `@nestjs/event-emitter` mirror.
+
+## Migrating to `@nestjs/resilience`
+
+| `@dudousxd/nestjs-resilience` | `@nestjs/resilience` |
+|---|---|
+| `timeout(ms)` | `new TimeoutPolicy(ms)` |
+| `retry({ attempts, backoff: exponential() })` | `new RetryPolicy({ attempts, backoff })` |
+| `circuitBreaker({ key, threshold, cooldownMs, halfOpenMax })` | `new CircuitBreakerPolicy({ name, failureRateThreshold, minimumCalls, slidingWindow, openDuration, halfOpenMaxCalls })` |
+| `failover({ targets, run, policy })` | `new FallbackPolicy(handler, options)`, chained per target |
+| `wrap(a, b, c)` | `ResiliencePolicy.wrap(a, b, c)` |
+| `@Timeout` / `@Retry` / `@CircuitBreaker` | the official `@Timeout` / `@Retry` / `@CircuitBreaker` / `@Resilience(preset)` (on routes, resolvers, gateways and message handlers); in services, `ResilienceService` or the policies directly |
+| `ResilienceModule` / `ResilienceService` | the official `ResilienceModule` / `ResilienceService` (same names, different package) |
+| `BrokenCircuitError` / `TimeoutError` | `CircuitOpenError` / `ResilienceTimeoutError` |
+| `diagnosticsSink` / `eventEmitterSink` (`aviary:resilience:*`) | `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels |
+| `ResilienceStore` and the store packages (distributed breaker state) | no equivalent: the official breaker keeps its state in each process, shared by `name` |
 
 ## Packages
 

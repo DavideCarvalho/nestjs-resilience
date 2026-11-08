@@ -1,0 +1,35 @@
+---
+title: Migrating to @nestjs/resilience
+description: This package is deprecated. Every policy maps to NestJS's own @nestjs/resilience.
+icon: ArrowRightLeft
+---
+
+`@dudousxd/nestjs-resilience` is deprecated. NestJS's [`@nestjs/resilience`](https://docs.nestjs.com/reliability/resilience) does what it did, and more (bulkhead, outbound rate limit, presets, fallback, HTTP error mapping with `Retry-After`).
+
+```bash
+pnpm remove @dudousxd/nestjs-resilience @dudousxd/nestjs-resilience-store-redis  # and any other store / telescope package
+pnpm add @nestjs/resilience
+```
+
+| `@dudousxd/nestjs-resilience` | `@nestjs/resilience` |
+|---|---|
+| `timeout(ms)` | `new TimeoutPolicy(ms)` |
+| `retry({ attempts, backoff: exponential() })` | `new RetryPolicy({ attempts, backoff })` |
+| `circuitBreaker({ key, threshold, cooldownMs, halfOpenMax })` | `new CircuitBreakerPolicy({ name, failureRateThreshold, minimumCalls, slidingWindow, openDuration, halfOpenMaxCalls })` |
+| `failover({ targets, run, policy })` | `new FallbackPolicy(handler, options)`, chained per target |
+| `wrap(a, b, c)` | `ResiliencePolicy.wrap(a, b, c)` |
+| `@Timeout` / `@Retry` / `@CircuitBreaker` | the official `@Timeout` / `@Retry` / `@CircuitBreaker` / `@Resilience(preset)` (on routes, resolvers, gateways and message handlers); in services, `ResilienceService` or the policies directly |
+| `ResilienceModule` / `ResilienceService` | the official `ResilienceModule` / `ResilienceService` (same names, different package) |
+| `BrokenCircuitError` / `TimeoutError` | `CircuitOpenError` / `ResilienceTimeoutError` |
+| `diagnosticsSink` / `eventEmitterSink` (`aviary:resilience:*`) | `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels |
+| `ResilienceStore` and the store packages (distributed breaker state) | no equivalent: the official breaker keeps its state in each process, shared by `name` |
+
+## What changes in behaviour
+
+- **The breaker counts a failure rate, not consecutive failures.** `threshold: 5, cooldownMs: 30_000` is closest to `{ failureRateThreshold: 100, minimumCalls: 5, slidingWindow: { type: 'count', size: 5 }, openDuration: 30_000 }`.
+- **Client errors don't trip it.** By default 4xx errors other than 408 and 429 are not recorded as failures (`recordIf`).
+- **Breaker state lives in each process.** Policies with the same `name` share state inside one process; each pod learns on its own. If you relied on a `ResilienceStore` to share state across a fleet, there is no official replacement.
+- **Decorators are for entrypoints.** The official decorators apply to routes, resolvers, gateways and message handlers. In a service, inject `ResilienceService` (`create()` / `preset()`) or build the policies yourself.
+- **Events** come from `ResilienceEvents` and the `nestjs:resilience:*` diagnostics channels, which Telescope records.
+
+After the switch, drop the `resilience_circuits` table and the `resilience:cb:*` Redis keys the stores left behind.
