@@ -7,6 +7,10 @@ icon: Telescope
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 [`diagnosticsSink()`](/docs/integrations#diagnostics) already pushes every transition onto the `aviary:resilience:*` channels. **[`@dudousxd/nestjs-resilience-telescope`](https://github.com/DavideCarvalho/nestjs-resilience/tree/master/packages/telescope)** turns that stream into a purpose-built **Resilience** dashboard in [Telescope](https://github.com/DavideCarvalho/nestjs-telescope) — instead of the generic diagnostic blobs you'd get otherwise.
 
 It's a [Telescope extension](https://github.com/DavideCarvalho/nestjs-telescope): a watcher that records one `resilience` entry per transition, plus a dashboard that summarises them. It needs nothing beyond the default `emit: true`, and costs nothing until resilience actually emits.

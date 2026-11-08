@@ -6,6 +6,10 @@ icon: Boxes
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 The NestJS surface is three things: **decorators** that wrap a provider method declaratively, the **`ResilienceModule`** that wires them up and holds named policies + the store, and the **`ResilienceService`** for running policies imperatively and inspecting circuits.
 
 ## The module

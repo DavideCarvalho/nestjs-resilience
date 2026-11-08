@@ -6,6 +6,10 @@ icon: Activity
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 Resilience plugs into the rest of the ecosystem through **event sinks** and a **context** accessor. Every integration is optional and soft-detected — nothing is a hard dependency.
 
 ## Events
@@ -69,6 +73,8 @@ TelescopeModule.forRoot({ extensions: [nestjsResilienceTelescope()] });
 ```
 
 It subscribes to the `aviary:resilience:*` channels, so it needs nothing beyond the default `emit: true` — and costs nothing until resilience emits. See the [Telescope dashboard](/docs/telescope) page for panels, options, and the exported building blocks.
+
+After migrating to `@nestjs/resilience`, use `NestResilienceWatcher` from `@dudousxd/nestjs-telescope-official` instead.
 
 ## Reacting in-app
 

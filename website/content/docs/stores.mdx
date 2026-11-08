@@ -7,6 +7,10 @@ icon: Database
 import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 The circuit breaker keeps its state — failure counts, open-until timestamps, the half-open probe — behind a small **`ResilienceStore`** interface. Swap the implementation to move that state from one process to your whole fleet.
 
 ```ts

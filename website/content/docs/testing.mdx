@@ -6,6 +6,10 @@ icon: FlaskConical
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
+<Callout type="warn" title="Deprecated">
+This package is deprecated in favour of `@nestjs/resilience`. See [Migrating to @nestjs/resilience](/docs/migrate-to-nestjs-resilience).
+</Callout>
+
 Resilience is full of time — timeouts, retry backoff, breaker cooldowns. To test it without real waiting, every time-dependent policy accepts an injectable `Clock`, and the package ships a `FakeClock` you advance by hand.
 
 ## The clock seam
