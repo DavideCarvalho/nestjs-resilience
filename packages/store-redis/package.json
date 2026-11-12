@@ -51,10 +51,10 @@
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
-    "@testcontainers/redis": "^10.18.0",
-    "ioredis": "^5.4.2",
-    "tsup": "^8",
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.6"
+    "@testcontainers/redis": "10.28.0",
+    "ioredis": "5.11.1",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
   }
 }
