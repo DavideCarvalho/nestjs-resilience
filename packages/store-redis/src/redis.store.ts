@@ -13,11 +13,21 @@ import { ADMIT_LUA, RECORD_LUA } from './lua';
 export interface RedisResilienceStoreOptions {
   clock?: Clock;
   keyPrefix?: string;
+  /**
+   * Skip the `record` round-trip for a success when this store's latest `admit` for the key saw a
+   * clean circuit (closed, no failures) and this store has not recorded a failure for the key since.
+   * Such a success would not change the hash, so the skip saves one script call per healthy call.
+   *
+   * It never skips a failure or a half-open probe outcome, and `admit` still reads Redis on every
+   * call, so a circuit opened by another instance is seen on the next call. Default `true`; set
+   * `false` to send every outcome to Redis.
+   */
+  successFastPath?: boolean;
 }
 
 /** ioredis client augmented with our two registered Lua commands. */
 type WithCommands = Redis & {
-  cbAdmit(key: string, now: number, max: number): Promise<[number, number, string]>;
+  cbAdmit(key: string, now: number, max: number): Promise<[number, number, string, number?]>;
   cbRecord(
     key: string,
     ok: number,
@@ -28,15 +38,29 @@ type WithCommands = Redis & {
   ): Promise<string>;
 };
 
+/** What this store last learned about a circuit, for the success fast path. */
+interface LocalHealth {
+  /** The newest applied `admit` saw a clean closed circuit, and no failure was recorded since. */
+  clean: boolean;
+  /** Sequence number of the newest `admit` whose reply was applied. */
+  seen: number;
+  /** Bumped before every failure is sent, so an `admit` already in flight cannot mark it clean. */
+  failures: number;
+}
+
 export class RedisResilienceStore implements ResilienceStore {
   private readonly redis: WithCommands;
   private readonly clock: Clock;
   private readonly prefix: string;
+  private readonly fastPath: boolean;
+  private readonly health = new Map<string, LocalHealth>();
+  private seq = 0;
 
   constructor(redis: Redis, opts: RedisResilienceStoreOptions = {}) {
     this.redis = redis as WithCommands;
     this.clock = opts.clock ?? systemClock;
     this.prefix = opts.keyPrefix ?? 'resilience:cb:';
+    this.fastPath = opts.successFastPath ?? true;
     // Register the scripts once per client (idempotent: skip if already defined).
     if (typeof this.redis.cbAdmit !== 'function') {
       this.redis.defineCommand('cbAdmit', { numberOfKeys: 1, lua: ADMIT_LUA });
@@ -50,9 +74,31 @@ export class RedisResilienceStore implements ResilienceStore {
     return this.prefix + key;
   }
 
+  private local(key: string): LocalHealth {
+    let h = this.health.get(key);
+    if (!h) {
+      h = { clean: false, seen: 0, failures: 0 };
+      this.health.set(key, h);
+    }
+    return h;
+  }
+
   async admit(key: string, cfg: BreakerConfig): Promise<Admission> {
     const max = cfg.halfOpenMax ?? 1;
-    const [allow, probe, status] = await this.redis.cbAdmit(this.k(key), this.clock.now(), max);
+    const h = this.fastPath ? this.local(key) : undefined;
+    const seq = ++this.seq;
+    const failuresAtSend = h?.failures ?? 0;
+    const [allow, probe, status, clean] = await this.redis.cbAdmit(
+      this.k(key),
+      this.clock.now(),
+      max,
+    );
+    // Apply only the newest reply, and only if no failure was sent while this admit was in flight:
+    // otherwise a stale "clean" read could mask a failure this store has already recorded.
+    if (h && seq > h.seen && h.failures === failuresAtSend) {
+      h.seen = seq;
+      h.clean = clean === 1;
+    }
     return { allow: allow === 1, probe: probe === 1, status: status as CircuitStatus };
   }
 
@@ -62,6 +108,18 @@ export class RedisResilienceStore implements ResilienceStore {
     ok: boolean,
     probe: boolean,
   ): Promise<CircuitStatus> {
+    if (this.fastPath) {
+      const h = this.local(key);
+      if (ok && !probe && h.clean) {
+        // The circuit was clean at a point inside this call (its admit or a later one), and a
+        // success on a clean circuit writes nothing, so the script would be a no-op there.
+        return 'closed';
+      }
+      if (!ok) {
+        h.failures++;
+        h.clean = false;
+      }
+    }
     const status = await this.redis.cbRecord(
       this.k(key),
       ok ? 1 : 0,

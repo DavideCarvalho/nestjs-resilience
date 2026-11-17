@@ -71,6 +71,8 @@ ResilienceModule.forRootAsync({
 
 `admit`/`record` each run as a single atomic Lua script — no schema, no migration. A healthy closed circuit is never written: a success on a clean circuit skips the `HSET`, so a key that has never failed has no hash (it reads as closed).
 
+Each script reads the hash with one `HMGET`. With `successFastPath` (default `true`), a success whose `admit` saw a clean closed circuit skips `record` altogether, so a healthy call costs 2 Redis commands (4 with `successFastPath: false`). Failures and half-open probe outcomes are always recorded, and `admit` reads Redis on every call, so a circuit another instance opened is seen on the next call.
+
 </Tab>
 <Tab value="TypeORM">
 

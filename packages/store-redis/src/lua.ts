@@ -1,15 +1,18 @@
 /**
  * Atomic admit. KEYS[1] = circuit hash. ARGV: now, halfOpenMax.
- * Mirrors InMemoryResilienceStore.admit. Returns {allow(1/0), probe(1/0), status}.
+ * Mirrors InMemoryResilienceStore.admit. Returns {allow(1/0), probe(1/0), status, clean(1/0)}, where
+ * `clean` means the circuit was closed with no failures and no open-until mark when this script read
+ * it (the store uses it for its client-side success fast path). The hash is read with one HMGET.
  */
 export const ADMIT_LUA = `
 local h = KEYS[1]
 local now = tonumber(ARGV[1])
 local max = tonumber(ARGV[2])
-local status = redis.call('HGET', h, 'status')
+local v = redis.call('HMGET', h, 'status', 'openUntil', 'probes', 'failures')
+local status = v[1]
 if status == false then status = 'closed' end
-local openUntil = tonumber(redis.call('HGET', h, 'openUntil') or '0')
-local probes = tonumber(redis.call('HGET', h, 'probes') or '0')
+local openUntil = tonumber(v[2] or '0')
+local probes = tonumber(v[3] or '0')
 
 if status == 'open' and now >= openUntil then
   status = 'half-open'
@@ -18,22 +21,24 @@ if status == 'open' and now >= openUntil then
 end
 
 if status == 'closed' then
-  return {1, 0, 'closed'}
+  local clean = 0
+  if tonumber(v[4] or '0') == 0 and openUntil == 0 then clean = 1 end
+  return {1, 0, 'closed', clean}
 end
 if status == 'open' then
-  return {0, 0, 'open'}
+  return {0, 0, 'open', 0}
 end
 if probes < max then
   redis.call('HINCRBY', h, 'probes', 1)
-  return {1, 1, 'half-open'}
+  return {1, 1, 'half-open', 0}
 end
-return {0, 0, 'half-open'}
+return {0, 0, 'half-open', 0}
 `;
 
 /**
  * Atomic record. KEYS[1] = circuit hash. ARGV: ok(1/0), probe(1/0), now, threshold, cooldownMs.
  * Mirrors InMemoryResilienceStore.record. Returns the resulting status string. A success on a circuit
- * that is already closed with no failures writes nothing.
+ * that is already closed with no failures writes nothing. The hash is read with one HMGET.
  */
 export const RECORD_LUA = `
 local h = KEYS[1]
@@ -43,24 +48,23 @@ local now = tonumber(ARGV[3])
 local threshold = tonumber(ARGV[4])
 local cooldownMs = tonumber(ARGV[5])
 
-if probe then
-  local p = tonumber(redis.call('HGET', h, 'probes') or '0')
-  if p > 0 then redis.call('HINCRBY', h, 'probes', -1) end
+local v = redis.call('HMGET', h, 'status', 'failures', 'openUntil', 'probes')
+local status = v[1]
+if status == false then status = 'closed' end
+
+if probe and tonumber(v[4] or '0') > 0 then
+  redis.call('HINCRBY', h, 'probes', -1)
 end
 
 if ok then
-  local current = redis.call('HGET', h, 'status')
-  local clean = (current == false or current == 'closed')
-    and tonumber(redis.call('HGET', h, 'failures') or '0') == 0
-    and tonumber(redis.call('HGET', h, 'openUntil') or '0') == 0
+  local clean = status == 'closed'
+    and tonumber(v[2] or '0') == 0
+    and tonumber(v[3] or '0') == 0
   if not clean then
     redis.call('HSET', h, 'status', 'closed', 'failures', 0, 'openUntil', 0)
   end
   return 'closed'
 end
-
-local status = redis.call('HGET', h, 'status')
-if status == false then status = 'closed' end
 
 if probe or status == 'half-open' then
   redis.call('HSET', h, 'status', 'open', 'openUntil', now + cooldownMs)
