@@ -19,8 +19,11 @@ export interface RedisResilienceStoreOptions {
    * Such a success would not change the hash, so the skip saves one script call per healthy call.
    *
    * It never skips a failure or a half-open probe outcome, and `admit` still reads Redis on every
-   * call, so a circuit opened by another instance is seen on the next call. Default `true`; set
-   * `false` to send every outcome to Redis.
+   * call, so a circuit opened by another instance is seen on the next call. A skipped `record`
+   * resolves to `'closed'`, the status its `admit` saw, not a fresh read of Redis.
+   *
+   * The store keeps one small entry in memory per circuit key it has seen, with no eviction; with
+   * very many distinct keys, set `false`. Default `true`; set `false` to send every outcome to Redis.
    */
   successFastPath?: boolean;
 }
@@ -112,7 +115,8 @@ export class RedisResilienceStore implements ResilienceStore {
       const h = this.local(key);
       if (ok && !probe && h.clean) {
         // The circuit was clean at a point inside this call (its admit or a later one), and a
-        // success on a clean circuit writes nothing, so the script would be a no-op there.
+        // success on a clean circuit writes nothing, so the script would be a no-op there. The
+        // returned status is the one admit saw; another instance may have changed it since.
         return 'closed';
       }
       if (!ok) {
