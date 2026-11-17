@@ -5,7 +5,7 @@ description: >
   backed by Redis (ioredis) with atomic Lua admit/record (cbAdmit / cbRecord). Use to share breaker
   state across many NestJS instances, wire it via ResilienceModule.forRoot({ store }), set a keyPrefix,
   inject an ioredis client, and rely on the fleet-wide exactly-one-half-open-probe guarantee. Covers
-  RedisResilienceStoreOptions (clock, keyPrefix) and the ioredis peer dependency.
+  RedisResilienceStoreOptions (clock, keyPrefix, successFastPath) and the ioredis peer dependency.
 license: MIT
 metadata:
   type: core
@@ -52,7 +52,9 @@ export class AppModule {}
 ### 1. Construct with an ioredis client (+ options)
 
 The constructor is `new RedisResilienceStore(redis, opts?)`. `RedisResilienceStoreOptions` accepts
-`keyPrefix` (default `'resilience:cb:'`) and a `clock`. On construction it registers the two Lua
+`keyPrefix` (default `'resilience:cb:'`), a `clock`, and `successFastPath` (default `true`: a
+success after an `admit` that saw a clean closed circuit skips the `record` script, so a healthy
+call costs 2 Redis commands instead of 4; failures and probe outcomes are always sent). On construction it registers the two Lua
 commands on the client via `defineCommand` — idempotently, so reusing a shared client is safe.
 
 ```ts
