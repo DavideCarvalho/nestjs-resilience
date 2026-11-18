@@ -23,7 +23,8 @@ export interface RedisResilienceStoreOptions {
    * resolves to `'closed'`, the status its `admit` saw, not a fresh read of Redis.
    *
    * The store keeps one small entry in memory per circuit key it has seen, with no eviction; with
-   * very many distinct keys, set `false`. Default `true`; set `false` to send every outcome to Redis.
+   * very many distinct keys, leave it off. Default `false` (every outcome is sent to Redis, as before
+   * 0.3.0); set `true` to opt in.
    */
   successFastPath?: boolean;
 }
@@ -63,7 +64,7 @@ export class RedisResilienceStore implements ResilienceStore {
     this.redis = redis as WithCommands;
     this.clock = opts.clock ?? systemClock;
     this.prefix = opts.keyPrefix ?? 'resilience:cb:';
-    this.fastPath = opts.successFastPath ?? true;
+    this.fastPath = opts.successFastPath ?? false;
     // Register the scripts once per client (idempotent: skip if already defined).
     if (typeof this.redis.cbAdmit !== 'function') {
       this.redis.defineCommand('cbAdmit', { numberOfKeys: 1, lua: ADMIT_LUA });

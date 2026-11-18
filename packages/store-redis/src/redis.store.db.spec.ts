@@ -27,7 +27,7 @@ suite('RedisResilienceStore (real Redis)', () => {
   // Fresh key namespace per makeStore call → the contract's reuse of key 'k' is isolated per case.
   runResilienceStoreContract(
     'RedisResilienceStore',
-    (clock) => new RedisResilienceStore(redis, { clock, keyPrefix: `t${++n}:` }),
+    (clock) => new RedisResilienceStore(redis, { clock, keyPrefix: `t${++n}:`, successFastPath: true }),
   );
 
   runResilienceStoreContract(
@@ -65,7 +65,7 @@ suite('RedisResilienceStore (real Redis)', () => {
 
   it('writes nothing for successful calls on a clean closed circuit', async () => {
     const cfg = { threshold: 3, cooldownMs: 1000 };
-    const store = new RedisResilienceStore(redis, { keyPrefix: 'clean:' });
+    const store = new RedisResilienceStore(redis, { keyPrefix: 'clean:', successFastPath: true });
     await store.record('k', cfg, false, false);
     await store.record('k', cfg, true, false);
     const before = await redis.hgetall('clean:k');
@@ -81,7 +81,7 @@ suite('RedisResilienceStore (real Redis)', () => {
 
   it('does not create a hash for a key that has only ever succeeded', async () => {
     const cfg = { threshold: 3, cooldownMs: 1000 };
-    const store = new RedisResilienceStore(redis, { keyPrefix: 'fresh:' });
+    const store = new RedisResilienceStore(redis, { keyPrefix: 'fresh:', successFastPath: true });
     await store.admit('k', cfg);
     await store.record('k', cfg, true, false);
     expect(await redis.exists('fresh:k')).toBe(0);
@@ -89,7 +89,7 @@ suite('RedisResilienceStore (real Redis)', () => {
 
   it('a success after failures resets the circuit', async () => {
     const cfg = { threshold: 3, cooldownMs: 1000 };
-    const store = new RedisResilienceStore(redis, { keyPrefix: 'reset:' });
+    const store = new RedisResilienceStore(redis, { keyPrefix: 'reset:', successFastPath: true });
     await store.record('k', cfg, false, false);
     await store.record('k', cfg, false, false);
     await store.record('k', cfg, true, false);
@@ -113,7 +113,7 @@ suite('RedisResilienceStore (real Redis)', () => {
     }
 
     it('a healthy call costs 2 commands with the fast path (admit only)', async () => {
-      const c = await healthyCalls(new RedisResilienceStore(redis, { keyPrefix: 'cost-fp:' }));
+      const c = await healthyCalls(new RedisResilienceStore(redis, { keyPrefix: 'cost-fp:', successFastPath: true }));
       expect(c).toEqual({ evalsha: N, hmget: N });
       expect(total(c) / N).toBe(2);
     });
@@ -126,7 +126,7 @@ suite('RedisResilienceStore (real Redis)', () => {
     });
 
     it('scripts never read the hash field by field', async () => {
-      const store = new RedisResilienceStore(redis, { keyPrefix: 'cost-mixed:' });
+      const store = new RedisResilienceStore(redis, { keyPrefix: 'cost-mixed:', successFastPath: true });
       const once = { threshold: 1, cooldownMs: 0 };
       const c = await countCommands(async () => {
         for (let i = 0; i < 20; i++) {
@@ -147,7 +147,7 @@ suite('RedisResilienceStore (real Redis)', () => {
     const cfg = { threshold: 3, cooldownMs: 60_000 };
 
     it('never skips a failure: failures after clean successes still open the circuit', async () => {
-      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-fail:' });
+      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-fail:', successFastPath: true });
       for (let i = 0; i < 5; i++) {
         const a = await store.admit('k', cfg);
         await store.record('k', cfg, true, a.probe);
@@ -164,7 +164,7 @@ suite('RedisResilienceStore (real Redis)', () => {
     });
 
     it('a success after a local failure still reaches Redis and resets the count', async () => {
-      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-reset:' });
+      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-reset:', successFastPath: true });
       const a1 = await store.admit('k', cfg); // clean
       const a2 = await store.admit('k', cfg); // clean
       await store.record('k', cfg, false, a2.probe); // failures = 1
@@ -175,8 +175,8 @@ suite('RedisResilienceStore (real Redis)', () => {
     it('observes a circuit another instance opened on the next admit', async () => {
       const other = new Redis({ host: container.getHost(), port: container.getFirstMappedPort() });
       try {
-        const a = new RedisResilienceStore(redis, { keyPrefix: 'fp-fleet:' });
-        const b = new RedisResilienceStore(other, { keyPrefix: 'fp-fleet:' });
+        const a = new RedisResilienceStore(redis, { keyPrefix: 'fp-fleet:', successFastPath: true });
+        const b = new RedisResilienceStore(other, { keyPrefix: 'fp-fleet:', successFastPath: true });
         const first = await a.admit('k', cfg);
         await a.record('k', cfg, true, first.probe);
         const inFlight = await a.admit('k', cfg); // clean when admitted
@@ -194,7 +194,7 @@ suite('RedisResilienceStore (real Redis)', () => {
     it('records half-open probe outcomes as before', async () => {
       let now = 0;
       const clock = { now: () => now };
-      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-probe:', clock });
+      const store = new RedisResilienceStore(redis, { keyPrefix: 'fp-probe:', clock, successFastPath: true });
       for (let i = 0; i < 3; i++) await store.record('k', cfg, false, false);
       now += cfg.cooldownMs;
       const probe = await store.admit('k', cfg);

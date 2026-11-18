@@ -14,7 +14,7 @@ function fakeRedis(hmgetReply: (string | null)[]) {
 describe('RedisResilienceStore.snapshot', () => {
   it('returns the closed default for a never-seen key (no openUntil field)', async () => {
     const redis = fakeRedis([null, null, null]);
-    const store = new RedisResilienceStore(redis as never, { keyPrefix: 'p:' });
+    const store = new RedisResilienceStore(redis as never, { keyPrefix: 'p:', successFastPath: true });
     const snap = await store.snapshot('k');
     expect(snap).toEqual({ status: 'closed', failures: 0 });
     expect(snap.openUntil).toBeUndefined();
@@ -24,13 +24,13 @@ describe('RedisResilienceStore.snapshot', () => {
 
   it('parses an open snapshot with failures and openUntil', async () => {
     const redis = fakeRedis(['open', '3', '5000']);
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     expect(await store.snapshot('k')).toEqual({ status: 'open', failures: 3, openUntil: 5000 });
   });
 
   it('omits openUntil when it is 0', async () => {
     const redis = fakeRedis(['closed', '0', '0']);
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     expect(await store.snapshot('k')).toEqual({ status: 'closed', failures: 0 });
   });
 });
@@ -60,7 +60,7 @@ describe('RedisResilienceStore success fast path', () => {
 
   it('skips the record round-trip for a success after a clean admit', async () => {
     const redis = deferredRedis();
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     const p = store.admit('k', cfg);
     reply(redis, 0, [1, 0, 'closed', 1]);
     await p;
@@ -70,7 +70,7 @@ describe('RedisResilienceStore success fast path', () => {
 
   it('always sends failures, probe outcomes, and successes after a dirty admit', async () => {
     const redis = deferredRedis();
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     const p = store.admit('k', cfg);
     reply(redis, 0, [1, 0, 'closed', 1]);
     await p;
@@ -88,7 +88,7 @@ describe('RedisResilienceStore success fast path', () => {
 
   it('an admit in flight when a failure is sent cannot mark the circuit clean', async () => {
     const redis = deferredRedis();
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     const stale = store.admit('k', cfg); // read by Redis before the failure below lands
     await store.record('k', cfg, false, false);
     reply(redis, 0, [1, 0, 'closed', 1]);
@@ -99,7 +99,7 @@ describe('RedisResilienceStore success fast path', () => {
 
   it('an older admit reply does not overwrite a newer one', async () => {
     const redis = deferredRedis();
-    const store = new RedisResilienceStore(redis as never);
+    const store = new RedisResilienceStore(redis as never, { successFastPath: true });
     const older = store.admit('k', cfg);
     const newer = store.admit('k', cfg);
     reply(redis, 1, [1, 0, 'closed', 0]);
@@ -113,6 +113,16 @@ describe('RedisResilienceStore success fast path', () => {
   it('sends every outcome when successFastPath is false', async () => {
     const redis = deferredRedis();
     const store = new RedisResilienceStore(redis as never, { successFastPath: false });
+    const p = store.admit('k', cfg);
+    reply(redis, 0, [1, 0, 'closed', 1]);
+    await p;
+    await store.record('k', cfg, true, false);
+    expect(redis.cbRecord).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends every outcome by default: the fast path is opt-in', async () => {
+    const redis = deferredRedis();
+    const store = new RedisResilienceStore(redis as never);
     const p = store.admit('k', cfg);
     reply(redis, 0, [1, 0, 'closed', 1]);
     await p;
