@@ -35,7 +35,7 @@ new RedisResilienceStore(redis, { keyPrefix, clock, successFastPath })
 |---|---|---|---|
 | `keyPrefix` | `string` | `'resilience:cb:'` | Prefix for every Redis key written by this store. |
 | `clock` | `Clock` | `systemClock` | Clock used for time comparisons. Override in tests with a `FakeClock`. |
-| `successFastPath` | `boolean` | `true` | Skip the `record` round-trip for a success the store knows would change nothing (see below). Set `false` to send every outcome to Redis. |
+| `successFastPath` | `boolean` | `false` | Opt in to skip the `record` round-trip for a success the store knows would change nothing (see below). Off by default: every outcome is sent to Redis, as before 0.3.0. |
 
 ## How it works
 
@@ -56,12 +56,12 @@ On a healthy circuit neither script writes: `admit` on a closed circuit only rea
 
 Each script reads the circuit hash with a single `HMGET`, so a script call costs 2 commands (`EVALSHA` + `HMGET`) plus any write it makes.
 
-With `successFastPath` (the default), a success skips `record` entirely when the store's latest `admit` for that key saw a clean circuit (closed, no failures) and the store has not sent a failure for the key since. A success on a clean circuit writes nothing, so the skipped script would have been a no-op at that moment. Failures and half-open probe outcomes are always sent.
+With `successFastPath: true` (opt-in), a success skips `record` entirely when the store's latest `admit` for that key saw a clean circuit (closed, no failures) and the store has not sent a failure for the key since. A success on a clean circuit writes nothing, so the skipped script would have been a no-op at that moment. Failures and half-open probe outcomes are always sent.
 
 | Call | Commands |
 |---|---|
-| Healthy call (closed, success), fast path on | 2 (`admit` only) |
-| Healthy call, `successFastPath: false` | 4 |
+| Healthy call (closed, success), `successFastPath: true` | 2 (`admit` only) |
+| Healthy call, fast path off (default) | 4 |
 | Failing call on a closed circuit | 5 (`admit` + `record` with `HINCRBY`) |
 | Short-circuited call (open) | 2 |
 

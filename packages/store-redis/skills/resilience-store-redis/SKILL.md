@@ -52,7 +52,7 @@ export class AppModule {}
 ### 1. Construct with an ioredis client (+ options)
 
 The constructor is `new RedisResilienceStore(redis, opts?)`. `RedisResilienceStoreOptions` accepts
-`keyPrefix` (default `'resilience:cb:'`), a `clock`, and `successFastPath` (default `true`: a
+`keyPrefix` (default `'resilience:cb:'`), a `clock`, and `successFastPath` (default `false`; opt in with `true`: a
 success after an `admit` that saw a clean closed circuit skips the `record` script, so a healthy
 call costs 2 Redis commands instead of 4; failures and probe outcomes are always sent). On construction it registers the two Lua
 commands on the client via `defineCommand` — idempotently, so reusing a shared client is safe.
