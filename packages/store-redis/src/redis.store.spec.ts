@@ -14,7 +14,10 @@ function fakeRedis(hmgetReply: (string | null)[]) {
 describe('RedisResilienceStore.snapshot', () => {
   it('returns the closed default for a never-seen key (no openUntil field)', async () => {
     const redis = fakeRedis([null, null, null]);
-    const store = new RedisResilienceStore(redis as never, { keyPrefix: 'p:', successFastPath: true });
+    const store = new RedisResilienceStore(redis as never, {
+      keyPrefix: 'p:',
+      successFastPath: true,
+    });
     const snap = await store.snapshot('k');
     expect(snap).toEqual({ status: 'closed', failures: 0 });
     expect(snap.openUntil).toBeUndefined();
