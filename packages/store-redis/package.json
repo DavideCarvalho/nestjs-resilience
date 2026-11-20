@@ -47,12 +47,12 @@
   },
   "peerDependencies": {
     "@dudousxd/nestjs-resilience": ">=0.1.0 <1.0.0",
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.0.0 || ^6.0.0"
   },
   "devDependencies": {
     "@dudousxd/nestjs-resilience": "workspace:^",
     "@testcontainers/redis": "^10.18.0",
-    "ioredis": "^5.4.2",
+    "ioredis": "^6.0.0",
     "tsup": "^8",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6"
